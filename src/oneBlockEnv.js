@@ -1,12 +1,10 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import GUI from 'lil-gui'
+import {createGUI} from "./environment/guiSettings.js";
 import earthVertexShader from './shaders/earth/vertex.glsl'
 import earthFragmentShader from './shaders/earth/fragment.glsl'
 import atmosphereVertexShader from './shaders/atmosphere/vertex.glsl'
 import atmosphereFragmentShader from './shaders/atmosphere/fragment.glsl'
-import {min, radians} from "three/nodes";
-
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -26,9 +24,6 @@ const skyboxTexture = cubeTextureLoader.load([
 ])
 scene.background = skyboxTexture
 
-/**
- * Earth
- */
 let speed=1
 let started=false
 const settings = {
@@ -46,19 +41,18 @@ const settings = {
         )
     },
     lunch:()=>{
-        speedController.disable()
-        followMeteorController.disable()
-        genSetGUI.close()
-        speedMeteorController.disable()
-        meteorTemperatureController.disable()
-        meteorRadiusController.disable()
+        controllers.speedController.disable()
+        controllers.followMeteorController.disable()
+        folder.genSetGUI.close()
+        controllers.speedMeteorController.disable()
+        controllers.meteorTemperatureController.disable()
+        controllers.meteorRadiusController.disable()
         controls.enabled=!settings.followMeteor;
         started=true
         meteor.position.copy(camera.position)
         if(followMeteor){
             camera.position.copy(meteor.position).add(new THREE.Vector3(0, 0, 5))
         }
-
         const launchDirection = new THREE.Vector3()
         camera.getWorldDirection(launchDirection)
         launchDirection.normalize()
@@ -273,35 +267,13 @@ const followMeteor = () => {
 
 
 // gui
-const gui = new GUI({title:"Settings"})
-
-const genSetGUI=gui.addFolder('General Settings')
-
-const followMeteorController=genSetGUI
-    .add(settings,'followMeteor')
-
-const speedController=genSetGUI
-    .add(settings,'speed')
-    .min(0)
-    .max(20)
-    .step(0.25)
-    .onFinishChange(()=>{
+const {gui,folder,controllers,updateControllersDisplay}=createGUI(settings,{
+    speedUpdate:()=>{
         speed=settings.speed
-    })
-const metSetGUI=gui.addFolder('Meteor Settings')
-const speedMeteorController=metSetGUI
-    .add(settings,'meteorSpeed')
-    .min(0)
-    .step(0.25)
-const meteorTemperatureController=metSetGUI
-    .add(settings,'meteorTemperature')
-const meteorRadiusController=metSetGUI
-    .add(settings,'meteorRadius')
-    .onChange(()=>{
-       settings.meteorRadiusUpdate()
-    })
-gui
-    .add(settings,'lunch')
+    },meteorRadiusUpdate:()=>{
+        settings.meteorRadiusUpdate()
+    }
+})
 
 //sizes
 const sizes = {
@@ -366,15 +338,24 @@ renderer.setClearColor('#000011')
  */
 const clock = new THREE.Clock()
 
+let time=Date.now()
+function getDeltaTime()
+{
+    const currentTime=Date.now()
+    const deltaTime=currentTime - time
+    time = currentTime
+    return deltaTime
+}
+
 const loop = () =>
 {
 
-    const deltaTime = clock.getDelta()
+    const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
 
     earth.rotation.y = elapsedTime * 0.02 *speed
     if (started && meteor.visible) {
-        const moveSpeed = 0.01 * speed *settings.meteorSpeed
+        const moveSpeed = 0.001 * speed *settings.meteorSpeed*deltaTime
         if (meteor.userData.direction) {
             meteor.position.add(meteor.userData.direction.clone().multiplyScalar(moveSpeed))
         }
@@ -389,8 +370,8 @@ const loop = () =>
                 settings.meteorRadiusUpdate()
             }
             else{
-                settings.meteorTemperature+=5
-                settings.meteorRadius-=0.0001
+                settings.meteorTemperature+=0.5*deltaTime
+                settings.meteorRadius-=0.0001*deltaTime
                 settings.meteorRadiusUpdate()
             }
             //Color of meteor dep on Temp
@@ -497,13 +478,10 @@ const loop = () =>
     }
     // Update controls
     controls.update()
-    meteorTemperatureController.updateDisplay()
-    speedMeteorController.updateDisplay()
-    meteorRadiusController.updateDisplay()
+    updateControllersDisplay()
 
     if (settings.followMeteor&&started) {
         followMeteor()
-
     }
     // Render
     renderer.render(scene, camera)

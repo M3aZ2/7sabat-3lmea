@@ -1,0 +1,210 @@
+import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import {createGUI} from "./environment/guiSettings.js";
+import {createPlanetScene} from "./environment/PlanetScene.js";
+import {createMeteor} from "./environment/meteor.js";
+import {createSpark_Explosion_Effects} from './environment/explosion&spark.js'
+// Canvas
+const canvas = document.querySelector('canvas.webgl')
+// Scene
+const scene = new THREE.Scene()
+const textureLoader = new THREE.TextureLoader()
+const cubeTextureLoader = new THREE.CubeTextureLoader()
+
+let speed=1
+let started=false
+const settings = {
+    followMeteor: false,
+    speed:1,
+    atmosphereDayColor : '#00aaff',
+    atmosphereTwilightColor : '#ff6600',
+    meteorSpeed:1,
+    meteorTemperature:1,
+    meteorRadius:1,
+    meteorRadiusUpdate:()=>{
+        meteor.geometry.dispose() // تخلص من الشكل القديم
+        meteor.geometry = new THREE.SphereGeometry(
+            0.1 * settings.meteorRadius, 64, 64
+        )
+    },
+    lunch:()=>{
+        controllers.speedController.disable()
+        controllers.followMeteorController.disable()
+        folder.genSetGUI.close()
+        controllers.speedMeteorController.disable()
+        controllers.meteorTemperatureController.disable()
+        controllers.meteorRadiusController.disable()
+        controls.enabled=!settings.followMeteor;
+        started=true
+        meteor.position.copy(camera.position)
+        if(followMeteor){
+            camera.position.copy(meteor.position).add(new THREE.Vector3(0, 0, 5*settings.meteorRadius))
+        }
+        const launchDirection = new THREE.Vector3()
+        camera.getWorldDirection(launchDirection)
+        launchDirection.normalize()
+        meteor.userData.direction = launchDirection.clone()
+    }
+}
+//Planet Scene
+const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
+//Meteor
+const {meteor,updateMeteorColor}=createMeteor(scene,textureLoader,settings)
+const {activeInAtmosphere,meteorImpact,shake}=createSpark_Explosion_Effects(scene,settings)
+
+//KeyboardEventListener
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    pixelRatio: Math.min(window.devicePixelRatio, 2)
+}
+window.addEventListener('resize', () =>
+{
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+    sizes.pixelRatio = Math.min(window.devicePixelRatio, 2)
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(sizes.pixelRatio)
+})
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'h'||e.key==='ا') {
+        gui.show(gui._hidden)
+    }
+    else if (e.key === 'v'||e.key==='ر') {
+        controls.target.set(0,0,0)
+    }
+})
+const cursor={
+    x:0,y:0
+}
+const cameraTargetPosition = new THREE.Vector3()
+window.addEventListener("mousemove",(event)=>{
+    cursor.x=-(event.clientX/sizes.width -0.5)
+    cursor.y=(event.clientY/sizes.height -0.5)
+} )
+window.addEventListener('mousedown', (e) => {
+    if (e.button === 0) {
+        isMouseDown = true
+    }
+})
+window.addEventListener('mouseup', (e) => {
+    if (e.button === 0) {
+        isMouseDown = false
+    }
+})
+let isMouseDown = false
+const followMeteor = () => {
+    const x = meteor.position.x
+    const y = meteor.position.y
+    const z = meteor.position.z
+
+    if (isMouseDown) {
+        cameraTargetPosition.set(
+            x + Math.sin(cursor.x * Math.PI * 2) * 2,
+            y + cursor.y * 5,
+            z + Math.cos(cursor.x * Math.PI * 2) * 2
+        )
+    } else {
+        cameraTargetPosition.set(x, y, z + 5)
+    }
+    camera.position.lerp(cameraTargetPosition, 0.01)
+    camera.lookAt(meteor.position)
+}
+// gui
+const {gui,folder,controllers,updateControllersDisplay}=createGUI(settings,{
+    speedUpdate:()=>{
+        speed=settings.speed
+    },meteorRadiusUpdate:()=>{
+        settings.meteorRadiusUpdate()
+    }
+})
+// Base camera
+const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 0.1, 600)
+camera.position.x = 0
+camera.position.y = 0
+camera.position.z = 40
+scene.add(camera)
+
+const listener = new THREE.AudioListener();
+camera.add(listener);
+const audioLoader = new THREE.AudioLoader();
+const sound = new THREE.PositionalAudio(listener);
+audioLoader.load(
+    'mp3.mp4',
+    buffer => {
+        sound.setBuffer(buffer);
+        sound.setVolume(8);
+    }
+);
+
+// Controls
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true
+controls.enabled = !settings.followMeteor
+
+/**
+ * Renderer
+ */
+const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true
+})
+renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(sizes.pixelRatio)
+renderer.setClearColor('#000011')
+
+const clock = new THREE.Clock()
+let time=Date.now()
+function getDeltaTime()
+{
+    const currentTime=Date.now()
+    const deltaTime=currentTime - time
+    time = currentTime
+    return deltaTime
+}
+
+const loop = () =>
+{
+    const deltaTime = getDeltaTime()
+    const elapsedTime = clock.getElapsedTime()
+
+    earth.rotation.y = elapsedTime * 0.02 *speed
+    if (started && meteor.visible) {
+        const moveSpeed = 0.001 * speed *settings.meteorSpeed*deltaTime
+        if (meteor.userData.direction) {
+            meteor.position.add(meteor.userData.direction.clone().multiplyScalar(moveSpeed))
+        }
+        const toEarth = meteor.position.distanceTo(earth.position)
+        if(toEarth<=12&&toEarth>8){
+            if(settings.meteorRadius<=0){
+                settings.meteorSpeed=0
+                meteor.visible = false
+                settings.meteorRadiusUpdate()
+            }
+            else{
+                settings.meteorTemperature+=0.5*deltaTime
+                settings.meteorRadius-=0.0001*deltaTime
+                settings.meteorRadiusUpdate()
+            }
+            updateMeteorColor()
+            activeInAtmosphere(settings,meteor,deltaTime)
+        }
+        else if (toEarth <= 8) {
+            meteor.visible = false
+            sound.play()
+            meteorImpact(earth,meteor,camera)
+        }
+    }
+    shake(deltaTime,camera)
+    controls.update()
+    updateControllersDisplay()
+    if (settings.followMeteor&&started) {
+        followMeteor()
+    }
+    renderer.render(scene, camera)
+    window.requestAnimationFrame(loop)
+}
+
+loop()
