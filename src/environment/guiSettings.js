@@ -22,6 +22,8 @@ export function createGUI(settings,updateCallback) {
         .add(settings,'meteorTemperature')
     const meteorRadiusController=metSetGUI
         .add(settings,'meteorRadius')
+        .min(0)
+        .max(25)
         .onChange(updateCallback.meteorRadiusUpdate)
     gui
         .add(settings,'lunch')
