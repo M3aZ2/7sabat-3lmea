@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js'
 export function createSpark_Explosion_Effects(scene,settings){
-    const sparks = []
+    const sparks = []//الذيل
     const sparkGeometry = new THREE.BufferGeometry()
     sparkGeometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3))
     sparkGeometry.setAttribute('color', new THREE.Float32BufferAttribute([], 3))
@@ -19,7 +19,7 @@ export function createSpark_Explosion_Effects(scene,settings){
 
 // Particle explosion
     const particlesGeometry = new THREE.BufferGeometry()
-    const particlesCount = 100
+    const particlesCount = 100//كل ما يرسم 100 نقطة بصير بيمسح من ورا وبزت نقاط جديدة
     const positions = new Float32Array(particlesCount * 3)
 
     const spread = settings.meteorRadius * 1.5
@@ -136,8 +136,8 @@ export function createSpark_Explosion_Effects(scene,settings){
         fadeOut()
         isShaking = true
         shakeDuration = 1
-        shakeElapsed = 0
-        shakeIntensity = 0.5
+        shakeElapsed = 0//
+        shakeIntensity = 0.5//مقدار الهزة
         originalCameraPosition.copy(camera.position)
     }
     const shake=(deltaTime,camera)=>{
