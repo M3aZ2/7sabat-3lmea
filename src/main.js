@@ -5,7 +5,6 @@ import {createPlanetScene} from "./environment/PlanetScene.js";
 import {createMeteor} from "./environment/meteor.js";
 import {createSpark_Explosion_Effects} from './environment/explosion&spark.js'
 
-// Canvas
 const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
@@ -23,6 +22,7 @@ const settings = {
     meteorTemperature:1,
     meteorRadius:1,
     lunch:()=>{
+        sound6barAljmajm.play()
         disableGui()
         controls.enabled=!settings.followMeteor;
         started=true
@@ -119,15 +119,24 @@ scene.add(camera)
 const listener = new THREE.AudioListener();
 camera.add(listener);
 const audioLoader = new THREE.AudioLoader();
-const sound = new THREE.PositionalAudio(listener);
+const soundCollison = new THREE.PositionalAudio(listener);
 audioLoader.load(
     'mp3.mp4',
     buffer => {
-        sound.setBuffer(buffer);
-        sound.setVolume(8);
+        soundCollison.setBuffer(buffer);
+        soundCollison.setVolume(8);
     }
 );
-
+const sound6barAljmajm = new THREE.PositionalAudio(listener)
+audioLoader.load('remix.mp3', buffer => {
+    sound6barAljmajm.setBuffer(buffer)
+    sound6barAljmajm.setLoop(true) // تشغيل مستمر
+    sound6barAljmajm.setVolume(4)
+    sound6barAljmajm.setRefDistance(5)      // مدى سماع واضح
+    sound6barAljmajm.setMaxDistance(100)    // مسافة الصوت
+    sound6barAljmajm.setDistanceModel('exponential') // تأثير واقعي
+})
+meteor.add(sound6barAljmajm)
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
@@ -182,7 +191,8 @@ const loop = () =>
         }
         else if (toEarth <= 8) {
             meteor.visible = false
-            sound.play()
+            sound6barAljmajm.stop()
+            soundCollison.play()
             meteorImpact(earth,meteor,camera)
 
         }

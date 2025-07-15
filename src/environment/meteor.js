@@ -41,7 +41,7 @@ export function createMeteor(scene,textureLoader,settings){
         meteorMaterial.opacity = THREE.MathUtils.clamp(1 - (settings.meteorTemperature / 4000), 0.4, 1)
     }
     const meteorRadiusUpdate=()=>{
-        meteor.geometry.dispose() // تخلص من الشكل القديم
+        meteor.geometry.dispose()
         meteor.geometry = new THREE.SphereGeometry(
             0.1 * settings.meteorRadius, 64, 64
         )
