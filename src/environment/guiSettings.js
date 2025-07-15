@@ -25,7 +25,7 @@ export function createGUI(settings,updateCallback) {
         .min(0)
         .max(25)
         .onChange(updateCallback.meteorRadiusUpdate)
-    gui
+    const lunchController=gui
         .add(settings,'lunch')
 
     const updateControllersDisplay=()=>
@@ -41,6 +41,7 @@ export function createGUI(settings,updateCallback) {
         speedMeteorController.disable()
         meteorTemperatureController.disable()
         meteorRadiusController.disable()
+        lunchController.disable()
     }
     return ({
         gui,

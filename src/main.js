@@ -34,6 +34,7 @@ const settings = {
         camera.getWorldDirection(launchDirection)
         launchDirection.normalize()
         meteor.userData.direction = launchDirection.clone()
+
     }
 }
 //Planet Scene
@@ -70,6 +71,10 @@ window.addEventListener('keydown', (e) => {
     }
     else if (e.key === 'v'||e.key==='ر') {
         controls.target.set(0,0,0)
+    }
+    else if (e.key === 'p'||e.key==='ح') {
+        volume = volume === 0 ? 4 : 0
+        sound6barAljmajm.setVolume(volume)
     }
 })
 const cursor={
@@ -127,11 +132,21 @@ audioLoader.load(
         soundCollison.setVolume(8);
     }
 );
+const soundCollison2 = new THREE.PositionalAudio(listener);
+audioLoader.load(
+    'gg.mp3',
+    buffer => {
+        soundCollison2.setBuffer(buffer);
+        soundCollison2.setVolume(40);
+    }
+);
 const sound6barAljmajm = new THREE.PositionalAudio(listener)
+let volume = 0
+sound6barAljmajm.setVolume(volume)
 audioLoader.load('remix.mp3', buffer => {
     sound6barAljmajm.setBuffer(buffer)
     sound6barAljmajm.setLoop(true) // تشغيل مستمر
-    sound6barAljmajm.setVolume(4)
+    sound6barAljmajm.setVolume(volume)
     sound6barAljmajm.setRefDistance(5)      // مدى سماع واضح
     sound6barAljmajm.setMaxDistance(100)    // مسافة الصوت
     sound6barAljmajm.setDistanceModel('exponential') // تأثير واقعي
@@ -192,7 +207,12 @@ const loop = () =>
         else if (toEarth <= 8) {
             meteor.visible = false
             sound6barAljmajm.stop()
-            soundCollison.play()
+            if(settings.meteorRadius>=20){
+                soundCollison2.play()
+            }else
+            {
+                soundCollison.play()
+            }
             meteorImpact(earth,meteor,camera)
 
         }
