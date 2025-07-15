@@ -4,6 +4,7 @@ import {createGUI} from "./environment/guiSettings.js";
 import {createPlanetScene} from "./environment/PlanetScene.js";
 import {createMeteor} from "./environment/meteor.js";
 import {createSpark_Explosion_Effects} from './environment/explosion&spark.js'
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 // Scene
@@ -21,19 +22,8 @@ const settings = {
     meteorSpeed:1,
     meteorTemperature:1,
     meteorRadius:1,
-    meteorRadiusUpdate:()=>{
-        meteor.geometry.dispose() // تخلص من الشكل القديم
-        meteor.geometry = new THREE.SphereGeometry(
-            0.1 * settings.meteorRadius, 64, 64
-        )
-    },
     lunch:()=>{
-        controllers.speedController.disable()
-        controllers.followMeteorController.disable()
-        folder.genSetGUI.close()
-        controllers.speedMeteorController.disable()
-        controllers.meteorTemperatureController.disable()
-        controllers.meteorRadiusController.disable()
+        disableGui()
         controls.enabled=!settings.followMeteor;
         started=true
         meteor.position.copy(camera.position)
@@ -49,9 +39,15 @@ const settings = {
 //Planet Scene
 const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
 //Meteor
-const {meteor,updateMeteorColor}=createMeteor(scene,textureLoader,settings)
+const {meteor,updateMeteorColor,meteorRadiusUpdate}=createMeteor(scene,textureLoader,settings)
+//Explosion
 const {activeInAtmosphere,meteorImpact,shake}=createSpark_Explosion_Effects(scene,settings)
-
+// gui
+const {gui,updateControllersDisplay,disableGui}=createGUI(settings,{
+    speedUpdate:()=>{
+        speed=settings.speed
+    },meteorRadiusUpdate
+})
 //KeyboardEventListener
 const sizes = {
     width: window.innerWidth,
@@ -112,14 +108,7 @@ const followMeteor = () => {
     camera.position.lerp(cameraTargetPosition, 0.01)
     camera.lookAt(meteor.position)
 }
-// gui
-const {gui,folder,controllers,updateControllersDisplay}=createGUI(settings,{
-    speedUpdate:()=>{
-        speed=settings.speed
-    },meteorRadiusUpdate:()=>{
-        settings.meteorRadiusUpdate()
-    }
-})
+
 // Base camera
 const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 0.1, 600)
 camera.position.x = 0
@@ -170,7 +159,7 @@ const loop = () =>
     const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
 
-    earth.rotation.y = elapsedTime * 0.02 *speed
+    earth.rotation.y = elapsedTime * 0.005 *speed
     if (started && meteor.visible) {
         const moveSpeed = 0.001 * speed *settings.meteorSpeed*deltaTime
         if (meteor.userData.direction) {
@@ -181,12 +170,12 @@ const loop = () =>
             if(settings.meteorRadius<=0){
                 settings.meteorSpeed=0
                 meteor.visible = false
-                settings.meteorRadiusUpdate()
+                meteorRadiusUpdate()
             }
             else{
                 settings.meteorTemperature+=0.5*deltaTime
                 settings.meteorRadius-=0.0001*deltaTime
-                settings.meteorRadiusUpdate()
+                meteorRadiusUpdate()
             }
             updateMeteorColor()
             activeInAtmosphere(settings,meteor,deltaTime)
@@ -195,6 +184,7 @@ const loop = () =>
             meteor.visible = false
             sound.play()
             meteorImpact(earth,meteor,camera)
+
         }
     }
     shake(deltaTime,camera)

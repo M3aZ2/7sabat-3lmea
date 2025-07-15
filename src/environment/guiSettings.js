@@ -25,21 +25,23 @@ export function createGUI(settings,updateCallback) {
         .onChange(updateCallback.meteorRadiusUpdate)
     gui
         .add(settings,'lunch')
+
     const updateControllersDisplay=()=>
     {
         meteorTemperatureController.updateDisplay()
         speedMeteorController.updateDisplay()
         meteorRadiusController.updateDisplay()
     }
-    return ({gui,
-        folder:{
-            genSetGUI,metSetGUI
-        },controllers:{
-        followMeteorController,
-            speedController,
-            speedMeteorController,
-            meteorTemperatureController,
-            meteorRadiusController
-        },
-        updateControllersDisplay})
+    const disableGui=()=>{
+        speedController.disable()
+        followMeteorController.disable()
+        genSetGUI.close()
+        speedMeteorController.disable()
+        meteorTemperatureController.disable()
+        meteorRadiusController.disable()
+    }
+    return ({
+        gui,
+        updateControllersDisplay,
+        disableGui})
 }
