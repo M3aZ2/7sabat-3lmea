@@ -73,7 +73,7 @@ window.addEventListener('keydown', (e) => {
         controls.target.set(0,0,0)
     }
     else if (e.key === 'p'||e.key==='ح') {
-        volume = volume === 0 ? 4 : 0
+        volume = volume === 0 ? 2 : 0
         sound6barAljmajm.setVolume(volume)
     }
 })
@@ -147,7 +147,7 @@ audioLoader.load('remix.mp3', buffer => {
     sound6barAljmajm.setBuffer(buffer)
     sound6barAljmajm.setLoop(true) // تشغيل مستمر
     sound6barAljmajm.setVolume(volume)
-    sound6barAljmajm.setRefDistance(5)      // مدى سماع واضح
+    sound6barAljmajm.setRefDistance(25)      // مدى سماع واضح
     sound6barAljmajm.setMaxDistance(100)    // مسافة الصوت
     sound6barAljmajm.setDistanceModel('exponential') // تأثير واقعي
 })
