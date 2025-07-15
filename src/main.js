@@ -17,7 +17,7 @@ const settings = {
     followMeteor: false,
     speed:1,
     atmosphereDayColor : '#00aaff',
-    atmosphereTwilightColor : '#ff6600',
+    atmosphereTwilightColor : '#4fda22',
     meteorSpeed:1,
     meteorTemperature:1,
     meteorRadius:1,
@@ -147,7 +147,7 @@ audioLoader.load('remix.mp3', buffer => {
     sound6barAljmajm.setBuffer(buffer)
     sound6barAljmajm.setLoop(true) // تشغيل مستمر
     sound6barAljmajm.setVolume(volume)
-    sound6barAljmajm.setRefDistance(25)      // مدى سماع واضح
+    sound6barAljmajm.setRefDistance(15)      // مدى سماع واضح
     sound6barAljmajm.setMaxDistance(100)    // مسافة الصوت
     sound6barAljmajm.setDistanceModel('exponential') // تأثير واقعي
 })
