@@ -134,12 +134,16 @@ export function createSpark_Explosion_Effects(scene,settings){
             }
         }
         fadeOut()
+        
+        
+    }
+    const setShakingTrue=(camera)=>{
         isShaking = true
         shakeDuration = 1
         shakeElapsed = 0//
         shakeIntensity = 0.5//مقدار الهزة
         originalCameraPosition.copy(camera.position)
-    }
+        }
     const shake=(deltaTime,camera)=>{
         if (isShaking) {
             shakeElapsed += deltaTime
@@ -157,6 +161,6 @@ export function createSpark_Explosion_Effects(scene,settings){
     }
 
 
-    return({activeInAtmosphere,meteorImpact,shake})
+    return({activeInAtmosphere,meteorImpact,shake,setShakingTrue})
 
 }
