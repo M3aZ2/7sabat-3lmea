@@ -13,6 +13,7 @@ const cubeTextureLoader = new THREE.CubeTextureLoader()
 
 let speed=1
 let started=false
+let isShaked=false
 const settings = {
     followMeteor: false,
     speed:1,
@@ -42,7 +43,7 @@ const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
 //Meteor
 const {meteor,updateMeteorColor,meteorRadiusUpdate}=createMeteor(scene,textureLoader,settings)
 //Explosion
-const {activeInAtmosphere,meteorImpact,shake}=createSpark_Explosion_Effects(scene,settings)
+const {activeInAtmosphere,meteorImpact,shake,setShakingTrue}=createSpark_Explosion_Effects(scene,settings)
 // gui
 const {gui,updateControllersDisplay,disableGui}=createGUI(settings,{
     speedUpdate:()=>{
@@ -205,6 +206,11 @@ const loop = () =>
             activeInAtmosphere(settings,meteor,deltaTime)
         }
         else if (toEarth <= 8) {
+            if(!isShaked)
+                {
+                    isShaked=true
+                    setShakingTrue(camera)
+                }
             meteor.visible = false
             sound6barAljmajm.stop()
             if(settings.meteorRadius>=20){
@@ -217,7 +223,7 @@ const loop = () =>
 
         }
     }
-    shake(deltaTime,camera)
+    shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)
     controls.update()
     updateControllersDisplay()
     if (settings.followMeteor&&started) {
