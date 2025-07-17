@@ -8,6 +8,7 @@ create: function(xVal,yVal,zVal){
     object.setX(xVal);
     object.setY(yVal);
     object.setZ(zVal);
+    return object;
 },
 getX: function(){
     return this._x;
@@ -33,7 +34,7 @@ setZ: function(val){
     this._z = val;
 },
 
-sum: function(vec){
+add: function(vec){
     return vector.create(
         this._x + vec.getX(),
         this._y + vec.getY(),
@@ -81,6 +82,10 @@ getLength: function () {
 
 square: function(){
     return this.getLength() * this.getLength();
+},
+
+cube: function(){
+    return this.square() * this.getLength();
 },
 
 normalize: function () {
