@@ -12,10 +12,11 @@ class Meteor{
     )
     {
         let speedDirection = vector.create(launchDirection.x, launchDirection.y ,launchDirection.z);
+        this.meteorPosition = position;
         this.gravity = 0;
         this.g = vector.create(0,0,0);
         this.totalF = vector.create(0, 0, 0);
-        this.position = vector.create(position.x, position.y, position.z);
+        this.position = vector.create(position.x * 10000, position.y * 10000, position.z * 10000);
         this.velocity = speedDirection.multiply(speed);
         this.meteorRadius = meteorRadius;
         this.temperature = temperature;
@@ -302,10 +303,16 @@ class Meteor{
     }
 
     updatePosition(deltaTime) {
-        this.position = this.position.add(this.velocity.multiply(deltaTime));
+        this.position = this.position.add(this.velocity.multiply(deltaTime * 60));//كل 60 دقيقة على ارض الواقع تساوي ثانية واحدة في المحاك
+
+        this.meteorPosition.x = this.position.getX() / 10000; //كل الف متر على ارض الواقع يساوي متر واحد في المحاكي
+
+        this.meteorPosition.y = this.position.getY() / 10000;
+
+        this.meteorPosition.z = this.position.getZ() / 10000;
     }
 
-    update(deltaTime) {
+    update(deltaTime){
 
         let F_drag = vector.create(0,0,0);
 
@@ -339,5 +346,6 @@ class Meteor{
 
         this.updatePosition(deltaTime);
     }
+
 
 }
