@@ -1,7 +1,7 @@
 class world{
     static EarthRaduis = 6356766;
-    static GravitationalConstant = 6.67428;
-    static EarthMass = 5.972e13;
+    static GravitationalConstant = 6.67428e-11;
+    static EarthMass = 5.972e24;
     static CyrcleDragCoefficient = 0.47;// معامل الشكل للكرة
     static P0 = 101325; // الضغط الجوي عند مستوى سطح البحر bar 1 =100000pa
     static DryGasConstant =  287.058; // ثابت الغازات الجافة

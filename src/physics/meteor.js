@@ -8,13 +8,14 @@ class Meteor{
         temperature,
         launchDirection,
         atmHight,
+        type,
     )
     {
         let speedDirection = vector.create(launchDirection.x, launchDirection.y ,launchDirection.z);
         this.gravity = 0;
         this.g = vector.create(0,0,0);
         this.totalF = vector.create(0, 0, 0);
-        this.position = vector.create(position.getX(), position.getY(), position.getZ());
+        this.position = vector.create(position.x, position.y, position.z);
         this.velocity = speedDirection.multiply(speed);
         this.meteorRadius = meteorRadius;
         this.temperature = temperature;
@@ -25,6 +26,7 @@ class Meteor{
         this.meteorDensity = 0;
         this.meteorMass = 0;
         this.atmHight = atmHight
+        this.setMeteorType(type);
 
     }
 
