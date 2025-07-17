@@ -25,7 +25,7 @@ class Meteor{
         this.meteorDensity = 0;
         this.meteorMass = 0;
         this.atmHight = atmHight
-        
+
     }
 
     setMeteorType(type){
@@ -279,7 +279,7 @@ class Meteor{
 
     }
 
-    
+
     checkCollision() {
 
         return this.heightAboveTheGround() <= 0;
