@@ -14,7 +14,7 @@ class Meteor{
         this.gravity = 0;
         this.g = vector.create(0,0,0);
         this.totalF = vector.create(0, 0, 0);
-        this.position = vector.create(position.getX(), position.getY(), position.getZ());
+        this.position = vector.create(position.x, position.y, position.z);
         this.velocity = speedDirection.multiply(speed);
         this.meteorRadius = meteorRadius;
         this.temperature = temperature;
