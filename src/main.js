@@ -36,7 +36,7 @@ const settings = {
         launchDirection.normalize()
         meteor.userData.direction = launchDirection.clone()
         physicsMeteor=new PhysicsMeteor(meteor.position,settings.meteorRadius,settings.meteorSpeed,settings.meteorTemperature,launchDirection.normalize(),settings.meteorType)
-        }
+    }
 }
 //Planet Scene
 const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
@@ -183,9 +183,8 @@ const loop = () =>
     const elapsedTime = clock.getElapsedTime()
     earth.rotation.y = elapsedTime * 2*Math.PI/1440;
     if (started && !physicsMeteor.isCrashed()) {
-        physicsMeteor.update(deltaTime);
-        settings.meteorRadius = physicsMeteor.meteorRadius/10000;
-        console.log(physicsMeteor.temperature);
+        physicsMeteor.update(deltaTime)
+        console.log(physicsMeteor.meteorRadius);
         if(physicsMeteor.isInAtmosphere()){
             if(settings.meteorRadius<=0){
                 settings.meteorSpeed=0
@@ -196,7 +195,7 @@ const loop = () =>
                 //here normal move increase speed and temp
                 meteorRadiusUpdate()
             }
-            activeInAtmosphere(settings,meteor,deltaTime)
+            //activeInAtmosphere(settings,meteor,deltaTime)
             updateMeteorColor()
         }
         else if (physicsMeteor.checkCollision()) {

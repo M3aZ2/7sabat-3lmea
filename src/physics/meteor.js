@@ -167,7 +167,7 @@ class Meteor{
 
         let dm_dt = (Λ * A * vCubed) / (2 * Q);
 
-        let dm = dm_dt * deltaTime;
+        let dm = dm_dt * deltaTime * 10000;
 
         return dm;
     }
@@ -254,7 +254,7 @@ class Meteor{
 
         let dragMagnitude = dragForce.getLength();
 
-        let addedHeat = dragMagnitude * deltaTime * 0.00005; // معامل تجريبي قابل للتعديل
+        let addedHeat = dragMagnitude * deltaTime ; // معامل تجريبي قابل للتعديل
 
         this.temperature += addedHeat;
     }
@@ -349,8 +349,8 @@ class Meteor{
 
         this.totalF = F_gravity.add(F_drag).add(F_coriolis).add(F_centrifugal);
 
-        this.updateVelocity(deltaTime);
-        this.updatePosition(deltaTime);
+        this.updateVelocity(deltaTime*10);
+        this.updatePosition(deltaTime*10);
     }
 
 
