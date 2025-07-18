@@ -1,5 +1,5 @@
 import vector from './vector'
-import world from './world'
+import World from './world'
 class Meteor{
     constructor(
         position,
@@ -25,7 +25,7 @@ class Meteor{
         this.Ek = 0;
         this.meteorDensity = 0;
         this.meteorMass = 0;
-        this.atmHight = world.EarthRaduis*1.5
+        this.atmHight = World.EarthRaduis*1.5
         this.setMeteorType(type);
 
     }
@@ -38,34 +38,33 @@ class Meteor{
         };
         type=types[type];
         if(type === 1) {//rocky
-        this.ablationCoefficient = 0.01;
-        this.heatOfVaporization = 6000000;     // J/kg
-        this.dynamicPressureLimit = 3000000;    // Pa (تقريب وسط)
-    }
+            this.ablationCoefficient = 0.01;
+            this.heatOfVaporization = 6000000;     // J/kg
+            this.dynamicPressureLimit = 3000000;    // Pa (تقريب وسط)
+        }
         else if(type === 2){//metallic
-        this.ablationCoefficient = 0.003;
-        this.heatOfVaporization = 8500000;
-        this.dynamicPressureLimit = 7000000;
-    }
+            this.ablationCoefficient = 0.003;
+            this.heatOfVaporization = 8500000;
+            this.dynamicPressureLimit = 7000000;
+        }
         else if(type === 3){//ice
-        this.ablationCoefficient = 0.05;
-        this.heatOfVaporization = 2600000;
-        this.dynamicPressureLimit = 300000;
-    }
-    const densities = {
-        1: 3000,     
-        2: 7800,
-        3: 1000
-    };
+            this.ablationCoefficient = 0.05;
+            this.heatOfVaporization = 2600000;
+            this.dynamicPressureLimit = 300000;
+        }
+        const densities = {
+            1: 3000,
+            2: 7800,
+            3: 1000
+        };
 
-    const density = densities[type];
+        const density = densities[type];
 
-    this.meteorDensity = density;
+        this.meteorDensity = density;
 
-    let volume = (4 / 3) * Math.PI * Math.pow(this.meteorRadius , 3);
+        let volume = (4 / 3) * Math.PI * Math.pow(this.meteorRadius , 3);
 
-    this.meteorMass = volume * density;
-    console.log(types[type]);
+        this.meteorMass = volume * density;
     }
 
     toVector(force , multiply , vec){
@@ -80,38 +79,38 @@ class Meteor{
     }
 
     heightAboveTheGround(){
-        return this.position.getLength() - (world.EarthRaduis + this.meteorRadius);
+        return this.position.getLength() - (World.EarthRaduis + this.meteorRadius);
     }
 
     gravityAcceleration() {                             //Earth's gravitational acceleration
-                                                        //g= G*M / r^2
+        //g= G*M / r^2
         let d = this.position.square();
 
-        let G = world.GravitationalConstant;
+        let G = World.GravitationalConstant;
 
-        let M = world.EarthMass
+        let M = World.EarthMass
 
         this.gravity = (G * M) / d;
     }
 
     gravityForce() {                                    //Gravity Force
-                                                        // W = m . g
+        // W = m . g
         let gForce = this.meteorMass * this.gravity
 
         this.g = this.toVector(gForce, -1 , this.position);
     }
 
     atmPressure() {                                     // Atmospheric pressure
-                                                        // p = p0 * exp(( -massOfOneAirMolecule * g * h ) / ( R * T ))
+        // p = p0 * exp(( -massOfOneAirMolecule * g * h ) / ( R * T ))
         let Tkelvin = this.temperature + 273.15;
 
         let h = this.heightAboveTheGround();
 
-        let r = world.R;
+        let r = World.R;
 
-        let p0 = world.P0;
+        let p0 = World.P0;
 
-        let massOfOneAirMolecule = world.MolarMassOfDryAir
+        let massOfOneAirMolecule = World.MolarMassOfDryAir
 
         let x = (-1 * massOfOneAirMolecule * this.gravity * h) / (r * Tkelvin);
 
@@ -119,37 +118,37 @@ class Meteor{
     }
 
     airDensity(){                                       // Air Density
-                                                        // ρ = p / (Rd * T)
+        // ρ = p / (Rd * T)
         let Tkelvin = this.temperature + 273.15;
 
         let p = this.atmPressure();
 
-        let Rd = world.DryGasConstant
+        let Rd = World.DryGasConstant
 
-        let rho = p / (Rd * Tkelvin); 
+        let rho = p / (Rd * Tkelvin);
 
         return rho;
     }
 
     airResistance(){                                    // Air Resistance
-                                                        // Fn = (ρ * v² * Cd * A) / 2
+        // Fn = (ρ * v² * Cd * A) / 2
         let rho = this.airDensity();
 
         let vSquared = this.velocity.square();
 
-        let Cd = world.CyrcleDragCoefficient;
+        let Cd = World.CyrcleDragCoefficient;
 
         let A = Math.PI * this.meteorRadius * this.meteorRadius;
 
-        let f = (rho * vSquared * Cd *A) / 2;
+        let f = (rho * vSquared * Cd *A) / 2 ;
 
         return this.toVector(f , -1 , this.velocity);
     }
 
-        
+
     dynamicPressure() {                                 //air pressure on the meteoroid
-                                                        // P =  ρ × v² / 2
-        let rho = this.airDensity(); 
+        // P =  ρ × v² / 2
+        let rho = this.airDensity();
         let vSquared = this.velocity.square();
 
         let pressure = rho * vSquared / 2;
@@ -158,7 +157,7 @@ class Meteor{
     }
 
     burnMass(deltaTime) {                               //Meteor combustion rate
-                                                        // dm/dt = (Λ × A × v³) / (2 × Q)
+        // dm/dt = (Λ × A × v³) / (2 × Q)
         let Λ = this.ablationCoefficient; // ثابت التبخر (وحدة: kg/m²)
         let Q = this.heatOfVaporization;  // حرارة التبخر (J/kg)
 
@@ -187,7 +186,7 @@ class Meteor{
     }
 
     updateRadiusFromMass() {                            //نقصان نصف القطر بسبب نقصان الكتلة
-                                                        // r = (3m / 4πρ)^(1/3) لحساب نصف القطر الجديد من الكتلة والكثافة
+        // r = (3m / 4πρ)^(1/3) لحساب نصف القطر الجديد من الكتلة والكثافة
         if (this.meteorMass <= 0) {
 
             this.meteorRadius = 0;
@@ -201,9 +200,9 @@ class Meteor{
         this.meteorRadius = newRadius;
     }
 
-    coriolisForce() {                                   //coriolis Force
-                                                        //Fc = 2 × m × ω × v
-        let omega = vector.create(0, world.AngularVelocityForEarth, 0); // rad/s
+    coriolisForce(deltaTime) {                                   //coriolis Force
+        //Fc = 2 × m × ω × v
+        let omega = vector.create(0, World.AngularVelocityForEarth * deltaTime / 100, 0); // rad/s
 
         let v = this.velocity;
 
@@ -219,7 +218,7 @@ class Meteor{
     }
 
     KineticEnergy(){                                    // Kinetic Energy
-                                                        // Ek = (m * v) / 2
+        // Ek = (m * v) / 2
         let m = this.meteorMass;
 
         let V = this.velocity.square();
@@ -230,13 +229,13 @@ class Meteor{
     }
 
     orbitalPeriod() {                                   // Kepler's Third Law
-                                                        // T = sqrt((4 * π^2 * r^3) / (G * (M + m)))
+        // T = sqrt((4 * π^2 * r^3) / (G * (M + m)))
 
         let rCube = this.position.cube();
 
-        let G = world.GravitationalConstant;
-        let M = world.EarthMass;
-        let m = this.meteorMass;             
+        let G = World.GravitationalConstant;
+        let M = World.EarthMass;
+        let m = this.meteorMass;
 
         let numerator = 4 * Math.PI * Math.PI * rCube;
 
@@ -250,21 +249,21 @@ class Meteor{
     }
 
     updateTemperature(deltaTime) {                      // increasing temperature
-                                                        // Temp = Fn * dt 
-        let dragForce = this.airResistance(); 
+        // Temp = Fn * dt
+        let dragForce = this.airResistance();
 
-        let dragMagnitude = dragForce.getLength(); 
+        let dragMagnitude = dragForce.getLength();
 
         let addedHeat = dragMagnitude * deltaTime * 0.00005; // معامل تجريبي قابل للتعديل
 
         this.temperature += addedHeat;
     }
 
-    centrifugalForce() {                                // Centrifugal Force
-                                                        // F = m * ω² * r
-        let r = this.position.getLength(); 
+    centrifugalForce(deltaTime) {                                // Centrifugal Force
+        // F = m * ω² * r
+        let r = this.position.getLength();
 
-        let omega = world.AngularVelocityForEarth;
+        let omega = World.AngularVelocityForEarth * deltaTime / 100;
 
         let F = this.meteorMass * omega * omega * r;
 
@@ -275,7 +274,7 @@ class Meteor{
 
         if(this.dynamicPressure() > this.dynamicPressureLimit * 4/* هاد ثابت مشان ما يختفي فجأة*/ || this.meteorMass < 0.1 || this.meteorRadius < 0.5){
 
-        return true;
+            return true;
         }
 
         return false;
@@ -292,7 +291,7 @@ class Meteor{
     checkCollision() {
 
         return this.heightAboveTheGround() <= 0;
-        
+
     }
 
     resetForces() {
@@ -310,15 +309,16 @@ class Meteor{
 
     updatePosition(deltaTime) {
         this.position = this.position.add(this.velocity.multiply(deltaTime));
-                                                                     //كل 60 دقيقة على ارض الواقع تساوي ثانية واحدة في المحاك
-        this.meteorPosition.x = (this.position.getX() * 60) / 10000; //كل الف متر على ارض الواقع يساوي متر واحد في المحاكي
+        //كل 60 دقيقة على ارض الواقع تساوي ثانية واحدة في المحاك
+        this.meteorPosition.x = (this.position.getX() ) / (10000); //كل الف متر على ارض الواقع يساوي متر واحد في المحاكي
 
-        this.meteorPosition.y = (this.position.getY() * 60) / 10000;
+        this.meteorPosition.y = (this.position.getY() ) / (10000);
 
-        this.meteorPosition.z = (this.position.getZ() *60) / 10000;
+        this.meteorPosition.z = (this.position.getZ() ) / (10000);
     }
 
     update(deltaTime){
+        deltaTime/=100;
 
         let F_drag = vector.create(0,0,0);
 
@@ -335,15 +335,17 @@ class Meteor{
         if(this.isInAtmosphere()){
 
             this.massDecrease(deltaTime);
-    
+
             this.updateTemperature(deltaTime);
 
             F_drag = this.airResistance();
+
         }
 
         let F_gravity = this.g;
-        let F_coriolis = this.coriolisForce();
-        let F_centrifugal = this.centrifugalForce();
+        let F_coriolis = this.coriolisForce(deltaTime);
+        let F_centrifugal = this.centrifugalForce(deltaTime);
+        //console.log(F_gravity.getLength(),F_coriolis.getLength(),F_centrifugal.getLength());
 
         this.totalF = F_gravity.add(F_drag).add(F_coriolis).add(F_centrifugal);
 
