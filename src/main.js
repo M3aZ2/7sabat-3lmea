@@ -19,6 +19,7 @@ const settings = {
     speed:1,
     atmosphereDayColor : '#00aaff',
     atmosphereTwilightColor : '#4fda22',
+    meteorType:'rock',
     meteorSpeed:1,
     meteorTemperature:1,
     meteorRadius:1,
@@ -41,15 +42,16 @@ const settings = {
 //Planet Scene
 const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
 //Meteor
-const {meteor,updateMeteorColor,meteorRadiusUpdate}=createMeteor(scene,textureLoader,settings)
+const {meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate}=createMeteor(scene,textureLoader,settings)
 //Explosion
 const {activeInAtmosphere,meteorImpact,shake,setShakingTrue}=createSpark_Explosion_Effects(scene,settings)
 // gui
 const {gui,updateControllersDisplay,disableGui}=createGUI(settings,{
     speedUpdate:()=>{
         speed=settings.speed
-    },meteorRadiusUpdate
+    },updateMeteorType,meteorRadiusUpdate
 })
+
 //KeyboardEventListener
 const sizes = {
     width: window.innerWidth,
@@ -220,7 +222,6 @@ const loop = () =>
                 soundCollison.play()
             }
             meteorImpact(earth,meteor,camera)
-
         }
     }
     shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)
