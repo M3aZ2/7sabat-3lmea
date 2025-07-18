@@ -65,7 +65,6 @@ class Meteor{
     let volume = (4 / 3) * Math.PI * Math.pow(this.meteorRadius , 3);
 
     this.meteorMass = volume * density;
-    console.log(types[type]);
     }
 
     toVector(force , multiply , vec){

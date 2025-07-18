@@ -182,9 +182,8 @@ const loop = () =>
     const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
     earth.rotation.y = elapsedTime * 2*Math.PI/1440;
-    console.log(physicsMeteor)
     if (started && !physicsMeteor.isCrashed()) {
-        // physicsMeteor.update(deltaTime)
+        physicsMeteor.update(deltaTime)
         if(physicsMeteor.isInAtmosphere()){
             if(settings.meteorRadius<=0){
                 settings.meteorSpeed=0
