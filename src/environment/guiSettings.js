@@ -14,6 +14,12 @@ export function createGUI(settings,updateCallback) {
         .step(0.25)
         .onFinishChange(updateCallback.speedUpdate)
     const metSetGUI=gui.addFolder('Meteor Settings')
+    const meteorTypeController=metSetGUI
+        .add(settings,'meteorType',
+        [ 'rock','ice','copper'])
+        .name('Meteor Type')
+        .onFinishChange(()=>{updateCallback.updateMeteorType(settings.meteorType)})
+
     const speedMeteorController=metSetGUI
         .add(settings,'meteorSpeed')
         .min(0)
@@ -37,6 +43,7 @@ export function createGUI(settings,updateCallback) {
     const disableGui=()=>{
         speedController.disable()
         followMeteorController.disable()
+        meteorTypeController.disable()
         genSetGUI.close()
         speedMeteorController.disable()
         meteorTemperatureController.disable()

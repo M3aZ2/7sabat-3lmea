@@ -2,19 +2,21 @@ import * as THREE from "three";
 
 export function createMeteor(scene,textureLoader,settings){
     const meteorGeometry= new THREE.SphereGeometry(0.1 * settings.meteorRadius, 64, 64)
-    const meteorColorMap = textureLoader.load('./meteor/ground_0010_color_1k.jpg')
+    const  meteorColorMapRock = textureLoader.load('./meteor/ground_0010_color_1k.jpg')
+    const meteorColorMapIce = textureLoader.load('./meteor/ground_0010_color_ice_1k.jpg')
+    const meteorColorMapCopper = textureLoader.load('./meteor/ground_0010_color_copper_1k.webp')
     const meteorAoMap = textureLoader.load('./meteor/ground_0010_ao_1k.jpg')
     const meteorRoughnessMap = textureLoader.load('./meteor/ground_0010_roughness_1k.jpg')
     const meteorNormalMap = textureLoader.load('./meteor/ground_0010_normal_opengl_1k.png') // استخدم OpenGL version
     const meteorDisplacementMap = textureLoader.load('./meteor/ground_0010_height_1k.png')
 
     const meteorMaterial = new THREE.MeshStandardMaterial({
-        map: meteorColorMap,
+        map: meteorColorMapRock,
         aoMap: meteorAoMap,
         roughnessMap: meteorRoughnessMap,
         normalMap: meteorNormalMap,
         displacementMap: meteorDisplacementMap,
-        displacementScale: 0.05
+        displacementScale: 0.1*settings.meteorRadius,
     })
     const meteor=new THREE.Mesh(meteorGeometry,meteorMaterial)
     meteor.geometry.setAttribute(
@@ -23,6 +25,19 @@ export function createMeteor(scene,textureLoader,settings){
     )
     scene.add(meteor)
     meteor.position.x=16
+    const updateMeteorType=(type)=>{
+        switch(type){
+            case 'rock':
+                meteorMaterial.map=meteorColorMapRock
+                break;
+            case 'ice':
+                meteorMaterial.map=meteorColorMapIce
+                break;
+            case 'copper':
+                meteorMaterial.map=meteorColorMapCopper
+                break;
+        }
+    }
     const updateMeteorColor=()=>{
         let hue
         if (settings.meteorTemperature < 800) {
@@ -46,5 +61,5 @@ export function createMeteor(scene,textureLoader,settings){
             0.1 * settings.meteorRadius, 64, 64
         )
     }
-    return ({meteor,updateMeteorColor,meteorRadiusUpdate})
+    return ({meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate})
 }

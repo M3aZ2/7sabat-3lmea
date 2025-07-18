@@ -303,13 +303,13 @@ class Meteor{
     }
 
     updatePosition(deltaTime) {
-        this.position = this.position.add(this.velocity.multiply(deltaTime * 60));//كل 60 دقيقة على ارض الواقع تساوي ثانية واحدة في المحاك
+        this.position = this.position.add(this.velocity.multiply(deltaTime));
+                                                                     //كل 60 دقيقة على ارض الواقع تساوي ثانية واحدة في المحاك
+        this.meteorPosition.x = (this.position.getX() * 60) / 10000; //كل الف متر على ارض الواقع يساوي متر واحد في المحاكي
 
-        this.meteorPosition.x = this.position.getX() / 10000; //كل الف متر على ارض الواقع يساوي متر واحد في المحاكي
+        this.meteorPosition.y = (this.position.getY() * 60) / 10000;
 
-        this.meteorPosition.y = this.position.getY() / 10000;
-
-        this.meteorPosition.z = this.position.getZ() / 10000;
+        this.meteorPosition.z = (this.position.getZ() *60) / 10000;
     }
 
     update(deltaTime){
