@@ -29,7 +29,7 @@ const settings = {
         started=true
         meteor.position.copy(camera.position)
         if(followMeteor){
-            camera.position.copy(meteor.position).add(new THREE.Vector3(0, 0, 5*settings.meteorRadius))
+            camera.position.copy(meteor.position).add(new THREE.Vector3(0, 0, 5*settings.meteorRadius/10000))
         }
         const launchDirection = new THREE.Vector3()
         camera.getWorldDirection(launchDirection)
@@ -182,8 +182,9 @@ const loop = () =>
     const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
     earth.rotation.y = elapsedTime * 2*Math.PI/1440;
+    console.log(physicsMeteor)
     if (started && !physicsMeteor.isCrashed()) {
-        physicsMeteor.update(deltaTime)
+        // physicsMeteor.update(deltaTime)
         if(physicsMeteor.isInAtmosphere()){
             if(settings.meteorRadius<=0){
                 settings.meteorSpeed=0
