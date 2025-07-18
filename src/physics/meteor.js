@@ -80,16 +80,16 @@ class Meteor{
     }
 
     heightAboveTheGround(){
-        return this.position.getLength() - (World.EarthRaduis + this.meteorRadius);
+        return this.position.getLength() - (world.EarthRaduis + this.meteorRadius);
     }
 
     gravityAcceleration() {                             //Earth's gravitational acceleration
                                                         //g= G*M / r^2
         let d = this.position.square();
 
-        let G = World.GravitationalConstant;
+        let G = world.GravitationalConstant;
 
-        let M = World.EarthMass
+        let M = world.EarthMass
 
         this.gravity = (G * M) / d;
     }
@@ -107,11 +107,11 @@ class Meteor{
 
         let h = this.heightAboveTheGround();
 
-        let r = World.R;
+        let r = world.R;
 
-        let p0 = World.P0;
+        let p0 = world.P0;
 
-        let massOfOneAirMolecule = World.MolarMassOfDryAir
+        let massOfOneAirMolecule = world.MolarMassOfDryAir
 
         let x = (-1 * massOfOneAirMolecule * this.gravity * h) / (r * Tkelvin);
 
@@ -124,7 +124,7 @@ class Meteor{
 
         let p = this.atmPressure();
 
-        let Rd = World.DryGasConstant
+        let Rd = world.DryGasConstant
 
         let rho = p / (Rd * Tkelvin); 
 
@@ -137,7 +137,7 @@ class Meteor{
 
         let vSquared = this.velocity.square();
 
-        let Cd = World.CyrcleDragCoefficient;
+        let Cd = world.CyrcleDragCoefficient;
 
         let A = Math.PI * this.meteorRadius * this.meteorRadius;
 
@@ -203,7 +203,7 @@ class Meteor{
 
     coriolisForce() {                                   //coriolis Force
                                                         //Fc = 2 × m × ω × v
-        let omega = vector.create(0, World.AngularVelocityForEarth, 0); // rad/s
+        let omega = vector.create(0, world.AngularVelocityForEarth, 0); // rad/s
 
         let v = this.velocity;
 
@@ -234,8 +234,8 @@ class Meteor{
 
         let rCube = this.position.cube();
 
-        let G = World.GravitationalConstant;
-        let M = World.EarthMass;             
+        let G = world.GravitationalConstant;
+        let M = world.EarthMass;
         let m = this.meteorMass;             
 
         let numerator = 4 * Math.PI * Math.PI * rCube;
@@ -264,7 +264,7 @@ class Meteor{
                                                         // F = m * ω² * r
         let r = this.position.getLength(); 
 
-        let omega = World.AngularVelocityForEarth; 
+        let omega = world.AngularVelocityForEarth;
 
         let F = this.meteorMass * omega * omega * r;
 
