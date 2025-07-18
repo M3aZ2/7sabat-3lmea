@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js'
+// import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js'
 export function createSpark_Explosion_Effects(scene,settings){
     const sparks = []//الذيل
     const sparkGeometry = new THREE.BufferGeometry()
@@ -94,7 +94,7 @@ export function createSpark_Explosion_Effects(scene,settings){
         sparkMaterial.size = THREE.MathUtils.clamp(settings.meteorRadius * 0.3, 0.1, 1)
 
     }
-    const meteorImpact=(earth,meteor,camera)=>{
+    const meteorImpact=(earth,meteor)=>{
         const impactDirection = new THREE.Vector3().subVectors(meteor.position, earth.position).normalize()
         const earthRadius = earth.geometry.parameters.radius
         const impactPoint = new THREE.Vector3().copy(earth.position).add(impactDirection.multiplyScalar(earthRadius * earth.scale.x))
@@ -137,17 +137,17 @@ export function createSpark_Explosion_Effects(scene,settings){
         
         
     }
-    const setShakingTrue=(camera)=>{
+    const setShakingTrue=()=>{
         isShaking = true
         shakeDuration = 1
         shakeElapsed = 0//
         shakeIntensity = 0.5//مقدار الهزة
-        originalCameraPosition.copy(camera.position)
+
         }
     const shake=(deltaTime,camera)=>{
         if (isShaking) {
             shakeElapsed += deltaTime
-
+            originalCameraPosition.copy(camera.position)
             if (shakeElapsed < shakeDuration) {
                 const shakeAmount = shakeIntensity * (1 - shakeElapsed / shakeDuration)
                 camera.position.x = originalCameraPosition.x + (Math.random() - 0.5) * shakeAmount
