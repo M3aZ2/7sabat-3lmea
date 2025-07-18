@@ -1,5 +1,5 @@
 import vector from './vector'
-import World from './world'
+import world from './world'
 class Meteor{
     constructor(
         position,
@@ -7,7 +7,6 @@ class Meteor{
         speed,
         temperature,
         launchDirection,
-        atmHight,
         type,
     )
     {
@@ -26,12 +25,18 @@ class Meteor{
         this.Ek = 0;
         this.meteorDensity = 0;
         this.meteorMass = 0;
-        this.atmHight = atmHight
+        this.atmHight = world.EarthRaduis*1.5
         this.setMeteorType(type);
 
     }
 
     setMeteorType(type){
+        const types = {
+            'rock': 1,
+            'copper': 2,
+            'ice': 3
+        };
+        type=types[type];
         if(type === 1) {//rocky
         this.ablationCoefficient = 0.01;
         this.heatOfVaporization = 6000000;     // J/kg
@@ -60,6 +65,7 @@ class Meteor{
     let volume = (4 / 3) * Math.PI * Math.pow(this.meteorRadius , 3);
 
     this.meteorMass = volume * density;
+    console.log(types[type]);
     }
 
     toVector(force , multiply , vec){
@@ -267,7 +273,7 @@ class Meteor{
 
     isCrashed(){
 
-        if(this.dynamicPressure() > this.dynamicPressureLimit * 4/* هاد ثابت مشان ما يختفي فجأة*/ || this.meteorMass < 0.1 || this.meteorRadius < 5){
+        if(this.dynamicPressure() > this.dynamicPressureLimit * 4/* هاد ثابت مشان ما يختفي فجأة*/ || this.meteorMass < 0.1 || this.meteorRadius < 0.5){
 
         return true;
         }
@@ -333,7 +339,6 @@ class Meteor{
             this.updateTemperature(deltaTime);
 
             F_drag = this.airResistance();
-
         }
 
         let F_gravity = this.g;
@@ -343,9 +348,9 @@ class Meteor{
         this.totalF = F_gravity.add(F_drag).add(F_coriolis).add(F_centrifugal);
 
         this.updateVelocity(deltaTime);
-
         this.updatePosition(deltaTime);
     }
 
 
 }
+export default Meteor

@@ -24,7 +24,7 @@ export function createMeteor(scene,textureLoader,settings){
         new THREE.BufferAttribute(meteor.geometry.attributes.uv.array, 2)
     )
     scene.add(meteor)
-    meteor.position.x=16
+    meteor.position.z=1900
     const updateMeteorType=(type)=>{
         switch(type){
             case 'rock':
@@ -58,7 +58,7 @@ export function createMeteor(scene,textureLoader,settings){
     const meteorRadiusUpdate=()=>{
         meteor.geometry.dispose()
         meteor.geometry = new THREE.SphereGeometry(
-            0.1 * settings.meteorRadius, 64, 64
+             settings.meteorRadius/10000, 64, 64
         )
     }
     return ({meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate})

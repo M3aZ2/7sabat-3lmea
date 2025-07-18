@@ -7,29 +7,23 @@ export function createGUI(settings,updateCallback) {
     const followMeteorController=genSetGUI
         .add(settings,'followMeteor')
 
-    const speedController=genSetGUI
-        .add(settings,'speed')
-        .min(0)
-        .max(20)
-        .step(0.25)
-        .onFinishChange(updateCallback.speedUpdate)
     const metSetGUI=gui.addFolder('Meteor Settings')
     const meteorTypeController=metSetGUI
         .add(settings,'meteorType',
-        [ 'rock','ice','copper'])
+        [ 'rock','copper','ice'])
         .name('Meteor Type')
         .onFinishChange(()=>{updateCallback.updateMeteorType(settings.meteorType)})
 
     const speedMeteorController=metSetGUI
         .add(settings,'meteorSpeed')
-        .min(0)
-        .step(0.25)
+        .min(1)
+        .step(1)
     const meteorTemperatureController=metSetGUI
         .add(settings,'meteorTemperature')
     const meteorRadiusController=metSetGUI
         .add(settings,'meteorRadius')
-        .min(0)
-        .max(25)
+        .min(1)
+        .max(100000)
         .onChange(updateCallback.meteorRadiusUpdate)
     const lunchController=gui
         .add(settings,'lunch')
@@ -41,7 +35,6 @@ export function createGUI(settings,updateCallback) {
         meteorRadiusController.updateDisplay()
     }
     const disableGui=()=>{
-        speedController.disable()
         followMeteorController.disable()
         meteorTypeController.disable()
         genSetGUI.close()

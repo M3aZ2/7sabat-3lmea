@@ -4,19 +4,18 @@ import {createGUI} from "./environment/guiSettings.js";
 import {createPlanetScene} from "./environment/PlanetScene.js";
 import {createMeteor} from "./environment/meteor.js";
 import {createSpark_Explosion_Effects} from './environment/explosion&spark.js'
-
+import PhysicsMeteor from './physics/meteor.js'
 const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 const textureLoader = new THREE.TextureLoader()
 const cubeTextureLoader = new THREE.CubeTextureLoader()
+var physicsMeteor;
 
-let speed=1
 let started=false
 let isShaked=false
 const settings = {
     followMeteor: false,
-    speed:1,
     atmosphereDayColor : '#00aaff',
     atmosphereTwilightColor : '#4fda22',
     meteorType:'rock',
@@ -36,7 +35,7 @@ const settings = {
         camera.getWorldDirection(launchDirection)
         launchDirection.normalize()
         meteor.userData.direction = launchDirection.clone()
-
+        physicsMeteor=new PhysicsMeteor(meteor.position,settings.meteorRadius,settings.meteorSpeed,settings.meteorTemperature,launchDirection.normalize(),settings.meteorType)
     }
 }
 //Planet Scene
@@ -47,9 +46,7 @@ const {meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate}=createMeteo
 const {activeInAtmosphere,meteorImpact,shake,setShakingTrue}=createSpark_Explosion_Effects(scene,settings)
 // gui
 const {gui,updateControllersDisplay,disableGui}=createGUI(settings,{
-    speedUpdate:()=>{
-        speed=settings.speed
-    },updateMeteorType,meteorRadiusUpdate
+   updateMeteorType,meteorRadiusUpdate
 })
 
 //KeyboardEventListener
@@ -118,10 +115,10 @@ const followMeteor = () => {
 }
 
 // Base camera
-const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 0.1, 600)
+const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 1, 14000)
 camera.position.x = 0
 camera.position.y = 0
-camera.position.z = 40
+camera.position.z = 2000
 scene.add(camera)
 
 const listener = new THREE.AudioListener();
@@ -180,48 +177,42 @@ function getDeltaTime()
     time = currentTime
     return deltaTime
 }
-
 const loop = () =>
 {
     const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
-
-    earth.rotation.y = elapsedTime * 0.005 *speed
-    if (started && meteor.visible) {
-        const moveSpeed = 0.001 * speed *settings.meteorSpeed*deltaTime
-        if (meteor.userData.direction) {
-            meteor.position.add(meteor.userData.direction.clone().multiplyScalar(moveSpeed))
-        }
-        const toEarth = meteor.position.distanceTo(earth.position)
-        if(toEarth<=12&&toEarth>8){
+    earth.rotation.y = elapsedTime * 2*Math.PI/1440;
+    if (started && !physicsMeteor.isCrashed()) {
+        physicsMeteor.update(deltaTime)
+        if(physicsMeteor.isInAtmosphere()){
             if(settings.meteorRadius<=0){
                 settings.meteorSpeed=0
                 meteor.visible = false
                 meteorRadiusUpdate()
             }
             else{
-                settings.meteorTemperature+=0.5*deltaTime
-                settings.meteorRadius-=0.0001*deltaTime
+                //here normal move increase speed and temp
                 meteorRadiusUpdate()
             }
-            updateMeteorColor()
             activeInAtmosphere(settings,meteor,deltaTime)
+            updateMeteorColor()
         }
-        else if (toEarth <= 8) {
+        else if (physicsMeteor.checkCollision()) {
             if(!isShaked)
                 {
                     isShaked=true
-                    setShakingTrue(camera)
+                    setShakingTrue()
                 }
             meteor.visible = false
+            started = false
             sound6barAljmajm.stop()
-            if(settings.meteorRadius>=20){
+            if(settings.meteorRadius>=70000){
                 soundCollison2.play()
             }else
             {
                 soundCollison.play()
             }
-            meteorImpact(earth,meteor,camera)
+            meteorImpact(earth,meteor)
         }
     }
     shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)
@@ -231,7 +222,9 @@ const loop = () =>
         followMeteor()
     }
     renderer.render(scene, camera)
+
     window.requestAnimationFrame(loop)
+
 }
 
 loop()

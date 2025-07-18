@@ -1,7 +1,7 @@
 var vector={
-    _x,
-    _y,
-    _z,
+    _x:0,
+    _y:0,
+    _z:0,
 
 create: function(xVal,yVal,zVal){
     var object = Object.create(this);
@@ -106,3 +106,4 @@ clone: function () {
 
 
 }
+export default vector;

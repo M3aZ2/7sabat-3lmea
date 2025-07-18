@@ -3,6 +3,7 @@ import earthVertexShader from '../shaders/earth/vertex.glsl'
 import earthFragmentShader from '../shaders/earth/fragment.glsl'
 import atmosphereVertexShader from '../shaders/atmosphere/vertex.glsl'
 import atmosphereFragmentShader from '../shaders/atmosphere/fragment.glsl'
+import world from '../physics/world.js';
 
 export function createPlanetScene(scene,textureLoader, cubeTextureLoader, settings) {
 
@@ -26,7 +27,7 @@ export function createPlanetScene(scene,textureLoader, cubeTextureLoader, settin
     const earthSpecularCloudsTexture = textureLoader.load('./earth/specularClouds.jpg')
     earthSpecularCloudsTexture.anisotropy = 8
     //mesh
-    const earthGeometry = new THREE.SphereGeometry(8, 64, 64)
+    const earthGeometry = new THREE.SphereGeometry(world.EarthRaduis/10000, 64, 64)
     const earthMaterial = new THREE.ShaderMaterial({
         vertexShader: earthVertexShader,
         fragmentShader: earthFragmentShader,
@@ -57,13 +58,13 @@ export function createPlanetScene(scene,textureLoader, cubeTextureLoader, settin
     })
 
     const atmosphere = new THREE.Mesh(earthGeometry, atmosphereMaterial)
-    atmosphere.scale.set(1.5, 1.5, 1.5)
+    atmosphere.scale.set(2.5, 2.5, 2.5)
     scene.add(atmosphere)
 //light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.4)
     scene.add(ambientLight)
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5)
-    directionalLight.position.set(15, 10, 5)
+    directionalLight.position.set(1192, 795, 397.5)
     scene.add(directionalLight)
 
 //sun
