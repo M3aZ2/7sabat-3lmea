@@ -17,3 +17,38 @@ body
     left: 0;
     outline: none;
 }
+body {
+    background: radial-gradient(ellipse at bottom, #0a0a1a 0%, #000000 100%);
+    overflow: hidden;
+}
+
+.lil-gui {
+    --background-color: rgba(10, 10, 30, 0.85);
+    --text-color: #00ffe7;
+    --title-text-color: #ff00d4;
+    --widget-color: #151525;
+    --hover-color: #1f1f3a;
+    --input-text-color: #ffffff;
+    --font-size: 14px;
+    font-family: 'Orbitron', sans-serif;
+
+    border: 1px solid #00ffe7;
+    box-shadow: 0 0 15px #00ffe7;
+    transition: all 0.2s ease-in-out;
+}
+
+.lil-gui .title {
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0% {
+        text-shadow: 0 0 5px #ff00d4, 0 0 10px #ff00d4;
+    }
+    50% {
+        text-shadow: 0 0 15px #00ffe7, 0 0 30px #00ffe7;
+    }
+    100% {
+        text-shadow: 0 0 5px #ff00d4, 0 0 10px #ff00d4;
+    }
+}

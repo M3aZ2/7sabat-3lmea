@@ -22,6 +22,10 @@ const settings = {
     meteorSpeed:1,
     meteorTemperature:1,
     meteorRadius:1,
+    gravity:0,
+    meteorMass:0,
+    EK:0,
+    airResistance:0,
     lunch:()=>{
         sound6barAljmajm.play()
         disableGui()
@@ -146,8 +150,8 @@ audioLoader.load('remix.mp3', buffer => {
     sound6barAljmajm.setBuffer(buffer)
     sound6barAljmajm.setLoop(true) // تشغيل مستمر
     sound6barAljmajm.setVolume(volume)
-    sound6barAljmajm.setRefDistance(15)      // مدى سماع واضح
-    sound6barAljmajm.setMaxDistance(100)    // مسافة الصوت
+    sound6barAljmajm.setRefDistance(150)      // مدى سماع واضح
+    sound6barAljmajm.setMaxDistance(1000)    // مسافة الصوت
     sound6barAljmajm.setDistanceModel('exponential') // تأثير واقعي
 })
 meteor.add(sound6barAljmajm)
@@ -180,12 +184,12 @@ const loop = () =>
 {
     const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
-    earth.rotation.y = elapsedTime * 2*Math.PI/1440;
-    if (started && !physicsMeteor.isCrashed()) {
+    earth.rotation.y = elapsedTime * 2*Math.PI/144;
+    if (started && !physicsMeteor.isCrashed()&&!physicsMeteor.checkCollision()) {
         physicsMeteor.update(deltaTime)
         updateControllersDisplay(physicsMeteor)
         if(physicsMeteor.isInAtmosphere()){
-            console.log(physicsMeteor.temperature);
+
             if(settings.meteorRadius<=0){
                 settings.meteorSpeed=0
                 meteor.visible = false
@@ -198,7 +202,7 @@ const loop = () =>
             //activeInAtmosphere(settings,meteor,deltaTime)
             updateMeteorColor()
         }
-         if (physicsMeteor.checkCollision()) {
+        if (physicsMeteor.checkCollision()) {
             if(!isShaked)
                 {
                     isShaked=true

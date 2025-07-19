@@ -99,6 +99,9 @@ class Meteor{
 
         this.g = this.toVector(gForce, -1 , this.position);
     }
+    getGravity(){
+        return this.g.getLength();
+    }
 
     atmPressure() {                                     // Atmospheric pressure
         // p = p0 * exp(( -massOfOneAirMolecule * g * h ) / ( R * T ))
@@ -145,6 +148,9 @@ class Meteor{
         return this.toVector(f , -1 , this.velocity);
     }
 
+    getAirResistance(){
+        return this.airResistance().getLength()
+    }
 
     dynamicPressure() {                                 //air pressure on the meteoroid
         // P =  ρ × v² / 2
@@ -287,12 +293,12 @@ class Meteor{
 
     }
 
-
     checkCollision() {
 
         return this.heightAboveTheGround() <= 0;
 
     }
+
     getspeed(){
         return this.velocity.getLength();
     }

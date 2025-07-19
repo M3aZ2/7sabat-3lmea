@@ -10,5 +10,6 @@ class world{
     static ScaleHeight = 8.5; //مقياس الارتفاع لكثافة الهواء H
     static AirDensityAtSeaLevel = 1.225;//كثافة الهواء عند سطح البحر
     static AngularVelocityForEarth = 7.292115e-5;//السرعة الزاوية للارض
+    static EarthTemperature=24//حرارة الارض
 }
 export default world

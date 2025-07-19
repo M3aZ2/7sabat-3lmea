@@ -1,7 +1,10 @@
 import GUI from 'lil-gui'
 
 export function createGUI(settings,updateCallback) {
+
     const gui = new GUI({title:"Settings"})
+    gui.domElement.classList.add('lil-gui');
+    document.documentElement.setAttribute('data-theme', 'light');
     const genSetGUI=gui.addFolder('General Settings')
 
     const followMeteorController=genSetGUI
@@ -29,6 +32,22 @@ export function createGUI(settings,updateCallback) {
         .step(1)
         .onChange(updateCallback.meteorRadiusUpdate)
         .listen()
+    const meteorMassController=metSetGUI
+        .add(settings,'meteorMass')
+        .disable()
+        .listen()
+    const gravityController=metSetGUI
+        .add(settings,'gravity')
+        .disable()
+        .listen()
+    const EkController=metSetGUI
+        .add(settings,'EK')
+        .disable()
+        .listen()
+    const airResistanceController=metSetGUI
+        .add(settings,'airResistance')
+        .disable()
+        .listen()
     const lunchController=gui
         .add(settings,'lunch')
 
@@ -37,6 +56,10 @@ export function createGUI(settings,updateCallback) {
         settings.meteorRadius=physicsMeteor.meteorRadius
         settings.meteorTemperature=physicsMeteor.temperature
         settings.meteorSpeed=physicsMeteor.getspeed()
+        settings.gravity=physicsMeteor.getGravity()
+        settings.meteorMass=physicsMeteor.meteorMass
+        settings.EK=physicsMeteor.Ek
+        settings.airResistance=physicsMeteor.getAirResistance()
     }
     const disableGui=()=>{
         followMeteorController.disable()
