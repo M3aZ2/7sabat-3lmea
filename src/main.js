@@ -185,7 +185,7 @@ const loop = () =>
         physicsMeteor.update(deltaTime)
         updateControllersDisplay(physicsMeteor)
         if(physicsMeteor.isInAtmosphere()){
-
+            console.log(physicsMeteor.temperature);
             if(settings.meteorRadius<=0){
                 settings.meteorSpeed=0
                 meteor.visible = false

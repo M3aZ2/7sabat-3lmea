@@ -10,13 +10,12 @@ class Meteor{
         type,
     )
     {
-        let speedDirection = vector.create(launchDirection.x, launchDirection.y ,launchDirection.z);
         this.meteorPosition = position;
         this.gravity = 0;
         this.g = vector.create(0,0,0);
         this.totalF = vector.create(0, 0, 0);
         this.position = vector.create(position.x * 10000, position.y * 10000, position.z * 10000);
-        this.velocity = speedDirection.multiply(speed);
+        this.velocity = vector.create(launchDirection.x * speed, launchDirection.y *speed ,launchDirection.z * speed);
         this.meteorRadius = meteorRadius;
         this.temperature = temperature;
         this.ablationCoefficient = 0;
@@ -27,6 +26,7 @@ class Meteor{
         this.meteorMass = 0;
         this.atmHight = World.EarthRaduis*1.5
         this.setMeteorType(type);
+
 
     }
 
@@ -121,7 +121,7 @@ class Meteor{
         // ρ = p / (Rd * T)
         let Tkelvin = this.temperature + 273.15;
 
-        let p = this.atmPressure();
+        let p = this.atmPressure();console.log(p);
 
         let Rd = World.DryGasConstant
 
@@ -254,7 +254,7 @@ class Meteor{
 
         let dragMagnitude = dragForce.getLength();
 
-        let addedHeat = dragMagnitude * deltaTime ; // معامل تجريبي قابل للتعديل
+        let addedHeat = dragMagnitude * deltaTime * 0.000005 ; // معامل تجريبي قابل للتعديل
 
         this.temperature += addedHeat;
     }
@@ -321,6 +321,7 @@ class Meteor{
     }
 
     update(deltaTime){
+
         deltaTime/=100;
 
         let F_drag = vector.create(0,0,0);
@@ -335,7 +336,7 @@ class Meteor{
 
         this.gravityForce();
 
-        if(this.isInAtmosphere()){
+        if(this.isInAtmosphere() && this.heightAboveTheGround() >= 100){
 
             this.massDecrease(deltaTime);
 
@@ -352,8 +353,9 @@ class Meteor{
 
         this.totalF = F_gravity.add(F_drag).add(F_coriolis).add(F_centrifugal);
 
+        if(this.meteorRadius>0){
         this.updateVelocity(deltaTime*10);
-        this.updatePosition(deltaTime*10);
+        this.updatePosition(deltaTime*10);}
     }
 
 
