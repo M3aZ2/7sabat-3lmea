@@ -34,7 +34,6 @@ const settings = {
         const launchDirection = new THREE.Vector3()
         camera.getWorldDirection(launchDirection)
         launchDirection.normalize()
-        meteor.userData.direction = launchDirection.clone()
         physicsMeteor=new PhysicsMeteor(meteor.position,settings.meteorRadius,settings.meteorSpeed,settings.meteorTemperature,launchDirection.normalize(),settings.meteorType)
     }
 }
@@ -184,8 +183,9 @@ const loop = () =>
     earth.rotation.y = elapsedTime * 2*Math.PI/1440;
     if (started && !physicsMeteor.isCrashed()) {
         physicsMeteor.update(deltaTime)
-        console.log(physicsMeteor.meteorRadius);
+        updateControllersDisplay(physicsMeteor)
         if(physicsMeteor.isInAtmosphere()){
+
             if(settings.meteorRadius<=0){
                 settings.meteorSpeed=0
                 meteor.visible = false
@@ -198,14 +198,13 @@ const loop = () =>
             //activeInAtmosphere(settings,meteor,deltaTime)
             updateMeteorColor()
         }
-        else if (physicsMeteor.checkCollision()) {
+         if (physicsMeteor.checkCollision()) {
             if(!isShaked)
                 {
                     isShaked=true
                     setShakingTrue()
                 }
             meteor.visible = false
-            started = false
             sound6barAljmajm.stop()
             if(settings.meteorRadius>=70000){
                 soundCollison2.play()
@@ -218,12 +217,11 @@ const loop = () =>
     }
     shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)
     controls.update()
-    updateControllersDisplay()
+
     if (settings.followMeteor&&started) {
         followMeteor()
     }
     renderer.render(scene, camera)
-
     window.requestAnimationFrame(loop)
 
 }

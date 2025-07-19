@@ -102,24 +102,6 @@ export function createSpark_Explosion_Effects(scene,settings){
         const sizeFactor = 0.5
         const speedFactor = 0.3
 
-        // const baseSizeDecal = 1
-        // const size = new THREE.Vector3(
-        //     baseSizeDecal * settings.meteorRadius * (0.5 + settings.meteorSpeed * 0.2),
-        //     baseSizeDecal * settings.meteorRadius * (0.5 + settings.meteorSpeed * 0.2),
-        //     baseSizeDecal * 0.5
-        // )
-        //
-        // const decalGeo = new DecalGeometry(earth, impactPoint, new THREE.Euler(), size)
-        // const decalMat = new THREE.MeshStandardMaterial({
-        //     color: 0x333333,
-        //     transparent: true,
-        //     opacity: 0.8,
-        //     depthTest: true,
-        //     depthWrite: false
-        // })
-        // const decalMesh = new THREE.Mesh(decalGeo, decalMat)
-        // scene.add(decalMesh)
-
         particlesMaterial.size = baseSize + (settings.meteorRadius * sizeFactor) + (settings.meteorSpeed * speedFactor)
         explosionParticles.position.copy(impactPoint)
         explosionParticles.visible = true

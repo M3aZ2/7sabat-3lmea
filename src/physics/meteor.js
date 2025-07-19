@@ -189,7 +189,7 @@ class Meteor{
         // r = (3m / 4πρ)^(1/3) لحساب نصف القطر الجديد من الكتلة والكثافة
         if (this.meteorMass <= 0) {
 
-            this.meteorRadius = 0;
+            this.meteorRadius = 0.1;
             return;
         }
 
@@ -292,6 +292,9 @@ class Meteor{
 
         return this.heightAboveTheGround() <= 0;
 
+    }
+    getspeed(){
+        return this.velocity.getLength();
     }
 
     resetForces() {
