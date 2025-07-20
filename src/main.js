@@ -13,7 +13,6 @@ const cubeTextureLoader = new THREE.CubeTextureLoader()
 var physicsMeteor;
 
 let started=false
-let isShaked=false
 const settings = {
     followMeteor: false,
     atmosphereDayColor : '#00aaff',
@@ -38,15 +37,16 @@ const settings = {
         const launchDirection = new THREE.Vector3()
         camera.getWorldDirection(launchDirection)
         launchDirection.normalize()
+
         physicsMeteor=new PhysicsMeteor(meteor.position,settings.meteorRadius,settings.meteorSpeed,settings.meteorTemperature,launchDirection.normalize(),settings.meteorType)
     }
 }
 //Planet Scene
 const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
 //Meteor
-const {meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate}=createMeteor(scene,textureLoader,settings)
+const {meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate,updateTrial}=createMeteor(scene,textureLoader,settings)
 //Explosion
-const {activeInAtmosphere,meteorImpact,shake,setShakingTrue}=createSpark_Explosion_Effects(scene,settings)
+const {activeInAtmosphere,meteorImpact,shake}=createSpark_Explosion_Effects(scene,settings)
 // gui
 const {gui,updateControllersDisplay,disableGui}=createGUI(settings,{
    updateMeteorType,meteorRadiusUpdate
@@ -132,7 +132,7 @@ audioLoader.load(
     'mp3.mp4',
     buffer => {
         soundCollison.setBuffer(buffer);
-        soundCollison.setVolume(8);
+        soundCollison.setVolume(160);
     }
 );
 const soundCollison2 = new THREE.PositionalAudio(listener);
@@ -140,7 +140,7 @@ audioLoader.load(
     'gg.mp3',
     buffer => {
         soundCollison2.setBuffer(buffer);
-        soundCollison2.setVolume(40);
+        soundCollison2.setVolume(200);
     }
 );
 const sound6barAljmajm = new THREE.PositionalAudio(listener)
@@ -184,50 +184,30 @@ const loop = () =>
 {
     const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
-    earth.rotation.y = elapsedTime * 2*Math.PI/144;
+    earth.rotation.y = elapsedTime * 2*Math.PI/1440;
     if (started && !physicsMeteor.isCrashed()&&!physicsMeteor.checkCollision()) {
         physicsMeteor.update(deltaTime)
         updateControllersDisplay(physicsMeteor)
         if(physicsMeteor.isInAtmosphere()){
-
-            if(settings.meteorRadius<=0){
+            if(settings.meteorMass<=0){
                 settings.meteorSpeed=0
                 meteor.visible = false
-                meteorRadiusUpdate()
             }
-            else{
-                //here normal move increase speed and temp
-                meteorRadiusUpdate()
-            }
-            //activeInAtmosphere(settings,meteor,deltaTime)
+            meteorRadiusUpdate()
             updateMeteorColor()
+            activeInAtmosphere(settings,meteor,deltaTime)
         }
         if (physicsMeteor.checkCollision()) {
-            if(!isShaked)
-                {
-                    isShaked=true
-                    setShakingTrue()
-                }
-            meteor.visible = false
-            sound6barAljmajm.stop()
-            if(settings.meteorRadius>=70000){
-                soundCollison2.play()
-            }else
-            {
-                soundCollison.play()
-            }
-            meteorImpact(earth,meteor)
+            meteorImpact(earth,meteor,camera,sound6barAljmajm,soundCollison,soundCollison2,settings.EK)
         }
+        updateTrial()
     }
-    shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)
+    //shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)
     controls.update()
-
     if (settings.followMeteor&&started) {
         followMeteor()
     }
     renderer.render(scene, camera)
     window.requestAnimationFrame(loop)
-
 }
-
 loop()

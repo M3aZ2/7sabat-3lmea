@@ -124,7 +124,7 @@ class Meteor{
         // ρ = p / (Rd * T)
         let Tkelvin = this.temperature + 273.15;
 
-        let p = this.atmPressure();console.log(p);
+        let p = this.atmPressure();
 
         let Rd = World.DryGasConstant
 
