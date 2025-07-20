@@ -28,34 +28,33 @@ export function createMeteor(scene,textureLoader,settings){
 
     const trailPositions = []
     const trailGeometry = new THREE.BufferGeometry()
-    const trailMaterial = new THREE.LineBasicMaterial({ color: 0xff6600 })
 
-// مبدئياً: هندسة فارغة
-    trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3))
+    const trailMaterial = new THREE.LineBasicMaterial({
+        color: 0xff6600,
+        linewidth: settings.meteorRadius / 10000 // هنا نحاول ربط العرض بنصف القطر
+    })
+
     const meteorTrailLine = new THREE.Line(trailGeometry, trailMaterial)
     scene.add(meteorTrailLine)
 
-    const updateTrial=()=>{
+    const updateTrial = () => {
+        if (!meteor.visible) return;
+
         const lastPoint = trailPositions.length >= 3
             ? new THREE.Vector3(
                 trailPositions[trailPositions.length - 3],
                 trailPositions[trailPositions.length - 2],
                 trailPositions[trailPositions.length - 1]
             )
-            : null
+            : null;
 
         if (!lastPoint || meteor.position.distanceTo(lastPoint) > 0.5) {
-            // أضف نقطة جديدة فقط إذا تحرك النيزك بما فيه الكفاية
-            trailPositions.push(meteor.position.x, meteor.position.y, meteor.position.z)
-        }
-        if (meteor.visible) {
-            // أضف موضع النيزك الحالي إلى المسار
             trailPositions.push(meteor.position.x, meteor.position.y, meteor.position.z)
 
-            // تحديث بيانات الخط
             trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPositions, 3))
             trailGeometry.attributes.position.needsUpdate = true
         }
+
     }
 
     const updateMeteorType=(type)=>{
@@ -93,6 +92,11 @@ export function createMeteor(scene,textureLoader,settings){
         meteor.geometry = new THREE.SphereGeometry(
              settings.meteorRadius/10000, 64, 64
         )
+        meteorTrailLine.material.dispose()
+        meteorTrailLine.material=new THREE.LineBasicMaterial({
+            color: 0xff6600,
+            linewidth: settings.meteorRadius / 10000 // هنا نحاول ربط العرض بنصف القطر
+        })
     }
     return ({meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate,updateTrial})
 }

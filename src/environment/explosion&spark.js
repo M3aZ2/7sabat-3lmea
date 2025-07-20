@@ -78,58 +78,127 @@ export function createSpark_Explosion_Effects(scene,settings) {
     }
 
 
-    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK,checkCollision,exploded) => {
+    const explosionVelocities = []
+    let explosionElapsed = 0
+    const particlesCount = 8000
+
+    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK, checkCollision, exploded) => {
         meteor.visible = false
         sound6barAljmajm.stop()
-        if(checkCollision&&!exploded) {
-            if (settings.meteorRadius >= 70000) {
-                soundCollison2.play()
-            } else {
-                soundCollison.play()
-            }
+
+        if (checkCollision && !exploded) {
+            if (settings.meteorRadius >= 70000) soundCollison2.play()
+            else soundCollison.play()
         }
+
         const impactDirection = new THREE.Vector3().subVectors(meteor.position, earth.position).normalize()
         const earthRadius = earth.geometry.parameters.radius
         const impactPoint = new THREE.Vector3().copy(earth.position).add(impactDirection.multiplyScalar(earthRadius * earth.scale.x))
 
-        particlesMaterial.size = THREE.MathUtils.clamp(EK / 1e22, 0.5, 15)
-        explosionParticles.position.copy(impactPoint)
-        explosionParticles.visible = true
-        let explosionTime = 0
+        const r = THREE.MathUtils.clamp((EK / 1e23) * 10 + 5, 5, 300)
 
-        // توليد توزيع كروي
-        const particlesCount = 8000
         const positions = new Float32Array(particlesCount * 3)
+        explosionVelocities.length = 0
+        explosionElapsed = 0
 
         for (let i = 0; i < particlesCount; i++) {
+            // start all points at impact point
+            positions[i * 3 + 0] = impactPoint.x
+            positions[i * 3 + 1] = impactPoint.y
+            positions[i * 3 + 2] = impactPoint.z
+
             const theta = Math.random() * Math.PI * 2
             const phi = Math.acos(2 * Math.random() - 1)
-            const r = Math.random() * (EK / 1e23) * 40 + 5 // حجم الكرة يتناسب مع طاقة الانفجار
+            const speed = Math.random() * r * 0.01
 
-            const x = r * Math.sin(phi) * Math.cos(theta)
-            const y = r * Math.sin(phi) * Math.sin(theta)
-            const z = r * Math.cos(phi)
+            const dir = new THREE.Vector3(
+                Math.sin(phi) * Math.cos(theta),
+                Math.sin(phi) * Math.sin(theta),
+                Math.cos(phi)
+            ).multiplyScalar(speed)
 
-            positions[i * 3 + 0] = x
-            positions[i * 3 + 1] = y
-            positions[i * 3 + 2] = z
+            explosionVelocities.push(dir)
         }
 
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
         particlesGeometry.attributes.position.needsUpdate = true
 
-
-        const fadeOut = () => {
-            explosionTime += 0.01
-            particlesMaterial.opacity = Math.max(10 - explosionTime, 0)
-            if (particlesMaterial.opacity > 0) {
-                requestAnimationFrame(fadeOut)
-            } else {
-                explosionParticles.visible = false
-            }
-        }
-        fadeOut()
+        particlesMaterial.size = THREE.MathUtils.clamp(EK / 1e22, 0.5, 15)
+        particlesMaterial.opacity = 1
+        explosionParticles.position.set(0, 0, 0) // reset position
+        explosionParticles.visible = true
     }
 
-    return ({activeInAtmosphere, meteorImpact})
+    const updateExplosionParticles = (deltaTime) => {
+        if (!explosionParticles.visible) return
+
+        explosionElapsed += deltaTime
+        const posAttr = explosionParticles.geometry.attributes.position
+
+        for (let i = 0; i < explosionVelocities.length; i++) {
+            posAttr.array[i * 3 + 0] += explosionVelocities[i].x * deltaTime * 0.05
+            posAttr.array[i * 3 + 1] += explosionVelocities[i].y * deltaTime * 0.05
+            posAttr.array[i * 3 + 2] += explosionVelocities[i].z * deltaTime * 0.05
+        }
+
+        posAttr.needsUpdate = true
+
+        if (explosionElapsed > 10000) {
+            explosionParticles.visible = false
+        }
+    }
+
+    return ({activeInAtmosphere, meteorImpact,updateExplosionParticles})
 }
+// const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK,checkCollision,exploded) => {
+//     meteor.visible = false
+//     sound6barAljmajm.stop()
+//     if(checkCollision&&!exploded) {
+//         if (settings.meteorRadius >= 70000) {
+//             soundCollison2.play()
+//         } else {
+//             soundCollison.play()
+//         }
+//     }
+//     const impactDirection = new THREE.Vector3().subVectors(meteor.position, earth.position).normalize()
+//     const earthRadius = earth.geometry.parameters.radius
+//     const impactPoint = new THREE.Vector3().copy(earth.position).add(impactDirection.multiplyScalar(earthRadius * earth.scale.x))
+//
+//     particlesMaterial.size = THREE.MathUtils.clamp(EK / 1e22, 0.5, 15)
+//     explosionParticles.position.copy(impactPoint)
+//     explosionParticles.visible = true
+//     let explosionTime = 0
+//
+//     // توليد توزيع كروي
+//     const particlesCount = 8000
+//     const positions = new Float32Array(particlesCount * 3)
+//
+//     for (let i = 0; i < particlesCount; i++) {
+//         const theta = Math.random() * Math.PI * 2
+//         const phi = Math.acos(2 * Math.random() - 1)
+//         const r = Math.random() * (EK / 1e23) * 40 + 5 // حجم الكرة يتناسب مع طاقة الانفجار
+//
+//         const x = r * Math.sin(phi) * Math.cos(theta)
+//         const y = r * Math.sin(phi) * Math.sin(theta)
+//         const z = r * Math.cos(phi)
+//
+//         positions[i * 3 + 0] = x
+//         positions[i * 3 + 1] = y
+//         positions[i * 3 + 2] = z
+//     }
+//
+//     particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+//     particlesGeometry.attributes.position.needsUpdate = true
+//
+//
+//     const fadeOut = () => {
+//         explosionTime += 0.01
+//         particlesMaterial.opacity = Math.max(10 - explosionTime, 0)
+//         if (particlesMaterial.opacity > 0) {
+//             requestAnimationFrame(fadeOut)
+//         } else {
+//             explosionParticles.visible = false
+//         }
+//     }
+//     fadeOut()
+// }

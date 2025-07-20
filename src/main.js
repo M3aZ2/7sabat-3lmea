@@ -46,7 +46,7 @@ const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
 //Meteor
 const {meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate,updateTrial}=createMeteor(scene,textureLoader,settings)
 //Explosion
-const {activeInAtmosphere,meteorImpact}=createSpark_Explosion_Effects(scene,settings)
+const {activeInAtmosphere,meteorImpact,updateExplosionParticles}=createSpark_Explosion_Effects(scene,settings)
 // gui
 const {gui,updateControllersDisplay,disableGui}=createGUI(settings,{
    updateMeteorType,meteorRadiusUpdate
@@ -204,6 +204,7 @@ const loop = () =>
 
         updateTrial()
     }
+        updateExplosionParticles(deltaTime)
     //shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)
     controls.update()
     if (settings.followMeteor&&started) {
