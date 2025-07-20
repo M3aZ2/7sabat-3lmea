@@ -26,7 +26,6 @@ class Meteor{
         this.meteorMass = 0;
         this.atmHight = World.EarthRaduis*1.5
         this.setMeteorType(type);
-        this.getTemperatureAtAltitude();
 
 
     }
@@ -136,6 +135,7 @@ class Meteor{
         let massOfOneAirMolecule = World.MolarMassOfDryAir
 
         let x = (-1 * massOfOneAirMolecule * this.gravity * h) / (r * Tkelvin);
+
         return p0 * Math.exp(x);
     }
 
@@ -283,7 +283,9 @@ class Meteor{
 
         let c = 800; // حرارة نوعية (يمكن تخصيصها حسب نوع النيزك)
 
-        let dT = (Q * deltaTime * 10000) / (this.meteorMass * c);
+        let m = Math.max(this.meteorMass,1);
+
+        let dT = (Q * deltaTime * 10000) / (m * c);
 
         this.temperature += dT;
     }
@@ -301,13 +303,17 @@ class Meteor{
 
     isCrashed(){
 
-        if(this.dynamicPressure() > this.dynamicPressureLimit * 20/* هاد ثابت مشان ما يختفي فجأة*/ || this.meteorMass < 0.1 || this.meteorRadius < 0.5){
+        if(this.meteorMass < 0.1 || this.meteorRadius < 0.5){
 
             return true;
         }
 
         return false;
 
+    }
+
+    isExploded(){
+        return this.dynamicPressure() > this.dynamicPressureLimit * 10;/* هاد ثابت مشان ما يختفي فجأة*/
     }
 
     isInAtmosphere(){
@@ -323,7 +329,7 @@ class Meteor{
     }
 
     getspeed(){
-        return this.velocity.getLength()/10;
+        return this.velocity.getLength();
     }
 
     resetForces() {
@@ -367,7 +373,7 @@ class Meteor{
 
         this.gravityForce();
 
-        if(this.isInAtmosphere() && this.heightAboveTheGround() >= 0.1){
+        if(this.isInAtmosphere() && this.heightAboveTheGround() >= 1){
 
             this.massDecrease(deltaTime);
 
