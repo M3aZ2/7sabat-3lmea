@@ -26,6 +26,7 @@ class Meteor{
         this.meteorMass = 0;
         this.atmHight = World.EarthRaduis*1.5
         this.setMeteorType(type);
+        this.getTemperatureAtAltitude();
 
 
     }
@@ -39,17 +40,17 @@ class Meteor{
         type=types[type];
         if(type === 1) {//rocky
             this.ablationCoefficient = 0.01;
-            this.heatOfVaporization = 6000000;     // J/kg
+            this.heatOfVaporization = 6000;     // J/kg
             this.dynamicPressureLimit = 3000000;    // Pa (تقريب وسط)
         }
         else if(type === 2){//metallic
             this.ablationCoefficient = 0.003;
-            this.heatOfVaporization = 8500000;
+            this.heatOfVaporization = 8500;
             this.dynamicPressureLimit = 7000000;
         }
         else if(type === 3){//ice
             this.ablationCoefficient = 0.05;
-            this.heatOfVaporization = 2600000;
+            this.heatOfVaporization = 2600;
             this.dynamicPressureLimit = 300000;
         }
         const densities = {
@@ -82,6 +83,22 @@ class Meteor{
         return this.position.getLength() - (World.EarthRaduis + this.meteorRadius);
     }
 
+    getTemperatureAtAltitude() {
+        const T0 = 15; // درجة حرارة سطح الأرض بالدرجة المئوية
+        const lapseRate = World.DangerousRateOfHypothermia; // المعدل الخطي لانخفاض الحرارة (°C/m)
+        let h = this.heightAboveTheGround();
+
+        // فقط ضمن التروبوسفير (حتى 11 كم)
+        if (h <= this.atmHight) {
+            return  T0 - lapseRate * h;
+
+        } else {
+            // فوق 11 كم، تبقى الحرارة ثابتة تقريباً عند -56.5°C (الستراتوسفير السفلى)
+            return  -56.5;
+        }
+    }
+
+
     gravityAcceleration() {                             //Earth's gravitational acceleration
         //g= G*M / r^2
         let d = this.position.square();
@@ -90,7 +107,7 @@ class Meteor{
 
         let M = World.EarthMass
 
-        this.gravity = (G * M) / d;
+        this.gravity = Math.min((G * M) / d , 10);
     }
 
     gravityForce() {                                    //Gravity Force
@@ -105,9 +122,9 @@ class Meteor{
 
     atmPressure() {                                     // Atmospheric pressure
         // p = p0 * exp(( -massOfOneAirMolecule * g * h ) / ( R * T ))
-        let Tkelvin = this.temperature + 273.15;
+        let Tkelvin = this.getTemperatureAtAltitude() + 273.15;
 
-        let h = this.heightAboveTheGround();
+        let h = Math.max(this.heightAboveTheGround(),1);
 
         let r = World.R;
 
@@ -122,7 +139,7 @@ class Meteor{
 
     airDensity(){                                       // Air Density
         // ρ = p / (Rd * T)
-        let Tkelvin = this.temperature + 273.15;
+        let Tkelvin = this.getTemperatureAtAltitude() + 273.15;
 
         let p = this.atmPressure();
 
@@ -130,7 +147,7 @@ class Meteor{
 
         let rho = p / (Rd * Tkelvin);
 
-        return rho;
+        return Math.min(rho,1.3);
     }
 
     airResistance(){                                    // Air Resistance
@@ -149,7 +166,9 @@ class Meteor{
     }
 
     getAirResistance(){
-        return this.airResistance().getLength()
+        if(this.isInAtmosphere()){
+        return this.airResistance().getLength();}
+        return 0;
     }
 
     dynamicPressure() {                                 //air pressure on the meteoroid
@@ -173,7 +192,7 @@ class Meteor{
 
         let dm_dt = (Λ * A * vCubed) / (2 * Q);
 
-        let dm = dm_dt * deltaTime * 10000;
+        let dm = dm_dt * deltaTime;
 
         return dm;
     }
@@ -256,13 +275,17 @@ class Meteor{
 
     updateTemperature(deltaTime) {                      // increasing temperature
         // Temp = Fn * dt
-        let dragForce = this.airResistance();
+        let rho = this.airDensity();
+        let v = this.getspeed();
+        let A = 4 * Math.PI * Math.pow(this.meteorRadius, 2);
+        let Λ = 0.9; // معامل تسخين (تجريبي)
+        let Q = 0.5 * rho * Math.pow(v, 3) * A * Λ;
 
-        let dragMagnitude = dragForce.getLength();
+        let c = 800; // حرارة نوعية (يمكن تخصيصها حسب نوع النيزك)
 
-        let addedHeat = dragMagnitude * deltaTime * 0.000005 ; // معامل تجريبي قابل للتعديل
+        let dT = (Q * deltaTime * 10000) / (this.meteorMass * c);
 
-        this.temperature += addedHeat;
+        this.temperature += dT;
     }
 
     centrifugalForce(deltaTime) {                                // Centrifugal Force
@@ -344,7 +367,9 @@ class Meteor{
 
         this.gravityForce();
 
-        if(this.isInAtmosphere() && this.heightAboveTheGround() >= 100){
+        this.getTemperatureAtAltitude();
+
+        if(this.isInAtmosphere() && this.heightAboveTheGround() >= 0.1){
 
             this.massDecrease(deltaTime);
 
