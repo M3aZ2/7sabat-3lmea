@@ -81,8 +81,13 @@ export function createSpark_Explosion_Effects(scene,settings) {
     const explosionVelocities = []
     let explosionElapsed = 0
     const particlesCount = 8000
+    let explosionDuration = 0 // الوقت اللازم للانتشار الكامل
 
-    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK, checkCollision, exploded) => {
+    const meteorImpact = (
+        earth, meteor, camera,
+        sound6barAljmajm, soundCollison, soundCollison2,
+        EK, checkCollision, exploded
+    ) => {
         meteor.visible = false
         sound6barAljmajm.stop()
 
@@ -95,27 +100,26 @@ export function createSpark_Explosion_Effects(scene,settings) {
         const earthRadius = earth.geometry.parameters.radius
         const impactPoint = new THREE.Vector3().copy(earth.position).add(impactDirection.multiplyScalar(earthRadius * earth.scale.x))
 
-        const r = THREE.MathUtils.clamp((EK / 1e23) * 10 + 5, 5, 300)
+        const r = THREE.MathUtils.clamp((EK / 1e23) * 40 + 5, 5, 300)
+        explosionDuration = r / 0.05 // سرعة الجزيئات × الزمن = r
 
         const positions = new Float32Array(particlesCount * 3)
         explosionVelocities.length = 0
         explosionElapsed = 0
 
         for (let i = 0; i < particlesCount; i++) {
-            // start all points at impact point
             positions[i * 3 + 0] = impactPoint.x
             positions[i * 3 + 1] = impactPoint.y
             positions[i * 3 + 2] = impactPoint.z
 
             const theta = Math.random() * Math.PI * 2
             const phi = Math.acos(2 * Math.random() - 1)
-            const speed = Math.random() * r * 0.01
 
             const dir = new THREE.Vector3(
                 Math.sin(phi) * Math.cos(theta),
                 Math.sin(phi) * Math.sin(theta),
                 Math.cos(phi)
-            ).multiplyScalar(speed)
+            ).normalize() // اتجاه فقط، السرعة نحسبها لاحقًا
 
             explosionVelocities.push(dir)
         }
@@ -125,7 +129,7 @@ export function createSpark_Explosion_Effects(scene,settings) {
 
         particlesMaterial.size = THREE.MathUtils.clamp(EK / 1e22, 0.5, 15)
         particlesMaterial.opacity = 1
-        explosionParticles.position.set(0, 0, 0) // reset position
+        explosionParticles.position.set(0, 0, 0)
         explosionParticles.visible = true
     }
 
@@ -135,16 +139,23 @@ export function createSpark_Explosion_Effects(scene,settings) {
         explosionElapsed += deltaTime
         const posAttr = explosionParticles.geometry.attributes.position
 
+        const progress = Math.min(explosionElapsed / explosionDuration, 1)
+
         for (let i = 0; i < explosionVelocities.length; i++) {
-            posAttr.array[i * 3 + 0] += explosionVelocities[i].x * deltaTime * 0.05
-            posAttr.array[i * 3 + 1] += explosionVelocities[i].y * deltaTime * 0.05
-            posAttr.array[i * 3 + 2] += explosionVelocities[i].z * deltaTime * 0.05
+            const velocity = explosionVelocities[i].clone().multiplyScalar(0.05 * deltaTime * (progress < 1 ? 1 : 0)) // أوقف الحركة بعد الوصول
+            posAttr.array[i * 3 + 0] += velocity.x
+            posAttr.array[i * 3 + 1] += velocity.y
+            posAttr.array[i * 3 + 2] += velocity.z
         }
 
         posAttr.needsUpdate = true
 
-        if (explosionElapsed > 10000) {
-            explosionParticles.visible = false
+        // Fade out تدريجي بعد التوقف
+        if (progress >= 1) {
+            particlesMaterial.opacity -= deltaTime * 0.0005 // اضمحلال بطيء
+            if (particlesMaterial.opacity <= 0) {
+                explosionParticles.visible = false
+            }
         }
     }
 
