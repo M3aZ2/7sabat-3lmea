@@ -78,13 +78,15 @@ export function createSpark_Explosion_Effects(scene,settings) {
     }
 
 
-    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK) => {
+    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK,checkCollision,exploded) => {
         meteor.visible = false
         sound6barAljmajm.stop()
-        if (settings.meteorRadius >= 70000) {
-            soundCollison2.play()
-        } else {
-            soundCollison.play()
+        if(checkCollision&&!exploded) {
+            if (settings.meteorRadius >= 70000) {
+                soundCollison2.play()
+            } else {
+                soundCollison.play()
+            }
         }
         const impactDirection = new THREE.Vector3().subVectors(meteor.position, earth.position).normalize()
         const earthRadius = earth.geometry.parameters.radius

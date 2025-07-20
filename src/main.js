@@ -132,7 +132,7 @@ audioLoader.load(
     'mp3.mp4',
     buffer => {
         soundCollison.setBuffer(buffer);
-        soundCollison.setVolume(160);
+        soundCollison.setVolume(320);
     }
 );
 const soundCollison2 = new THREE.PositionalAudio(listener);
@@ -140,7 +140,7 @@ audioLoader.load(
     'gg.mp3',
     buffer => {
         soundCollison2.setBuffer(buffer);
-        soundCollison2.setVolume(200);
+        soundCollison2.setVolume(400);
     }
 );
 const sound6barAljmajm = new THREE.PositionalAudio(listener)
@@ -185,12 +185,9 @@ const loop = () =>
     const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
     earth.rotation.y = elapsedTime * 2*Math.PI/1440;
-    if(physicsMeteor)
-    {console.log(physicsMeteor.isCrashed())}
     if (started && !physicsMeteor.isCrashed()&&!physicsMeteor.checkCollision()) {
         started=physicsMeteor.update(deltaTime)
         !started?sound6barAljmajm.stop():''
-
         updateControllersDisplay(physicsMeteor)
         if(physicsMeteor.isInAtmosphere()){
             if(settings.meteorMass<=0){
@@ -201,9 +198,10 @@ const loop = () =>
             updateMeteorColor()
             activeInAtmosphere(settings,meteor,deltaTime)
         }
-        if (physicsMeteor.checkCollision()) {
-            meteorImpact(earth,meteor,camera,sound6barAljmajm,soundCollison,soundCollison2,settings.EK)
+        if (physicsMeteor.checkCollision()||physicsMeteor.isExploded()) {
+            meteorImpact(earth,meteor,camera,sound6barAljmajm,soundCollison,soundCollison2,settings.EK,physicsMeteor.checkCollision(),physicsMeteor.isExploded())
         }
+
         updateTrial()
     }
     //shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)

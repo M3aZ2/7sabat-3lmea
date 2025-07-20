@@ -313,7 +313,7 @@ class Meteor{
     }
 
     isExploded(){
-        return this.dynamicPressure() > this.dynamicPressureLimit * 10;/* هاد ثابت مشان ما يختفي فجأة*/
+        return this.dynamicPressure() > this.dynamicPressureLimit*20 ;/* هاد ثابت مشان ما يختفي فجأة*/
     }
 
     isInAtmosphere(){
@@ -393,7 +393,6 @@ class Meteor{
         if(this.meteorRadius>0){
         var soso=this.updateVelocity(deltaTime);
         this.updatePosition(deltaTime);}
-        console.log(this.checkCollision());
         return soso;
     }
 

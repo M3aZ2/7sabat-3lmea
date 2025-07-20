@@ -79,7 +79,7 @@ export function createMeteor(scene,textureLoader,settings){
             hue = 0.05 // Orange
         } else if (settings.meteorTemperature < 2500) {
             hue = 0.1 // Yellow
-        } else if (settings.meteorTemperature < 4000) {
+        } else {
             hue = 0.13 // light yellow
         }
         meteorMaterial.color.setHSL(hue, 1, 0.5)
