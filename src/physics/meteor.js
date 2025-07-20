@@ -311,9 +311,11 @@ class Meteor{
 
     updateVelocity(deltaTime) {
 
+        if(this.meteorMass<=1)
+            return false;
         let acceleration = this.totalF.divide(this.meteorMass);
-
         this.velocity = this.velocity.add(acceleration.multiply(deltaTime));
+        return true;
     }
 
     updatePosition(deltaTime) {
@@ -360,10 +362,10 @@ class Meteor{
         this.totalF = F_gravity.add(F_drag).add(F_coriolis).add(F_centrifugal);
 
         if(this.meteorRadius>0){
-        this.updateVelocity(deltaTime*10);
+        var soso=this.updateVelocity(deltaTime*10);
         this.updatePosition(deltaTime*10);}
+        return soso;
     }
-
 
 }
 export default Meteor

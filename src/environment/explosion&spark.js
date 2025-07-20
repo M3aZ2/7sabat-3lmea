@@ -1,6 +1,6 @@
 import * as THREE from "three";
 // import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js'
-export function createSpark_Explosion_Effects(scene,settings){
+export function createSpark_Explosion_Effects(scene,settings) {
     const sparks = []//الذيل
     const sparkGeometry = new THREE.BufferGeometry()
     sparkGeometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3))
@@ -33,7 +33,7 @@ export function createSpark_Explosion_Effects(scene,settings){
 
 
     const activeInAtmosphere = (settings, meteor, deltaTime) => {
-        const sparkCount = Math.ceil(settings.meteorRadius/1000 * 0.5) // أقل عدد شرر لأن نصف القطر صار كبير
+        const sparkCount = Math.ceil(settings.meteorRadius / 1000 * 0.5) // أقل عدد شرر لأن نصف القطر صار كبير
 
         for (let i = 0; i < sparkCount; i++) {
             const sparkHue = THREE.MathUtils.clamp(0.02 + settings.meteorTemperature * 0.00003, 0, 0.15)
@@ -42,9 +42,9 @@ export function createSpark_Explosion_Effects(scene,settings){
             sparks.push({
                 position: meteor.position.clone(),
                 velocity: new THREE.Vector3(
-                    (Math.random() - 0.5) * settings.meteorRadius/100 * 0.05, // انتشر أوسع حسب الحجم
-                    (Math.random() - 0.5) * settings.meteorRadius/100 * 0.05,
-                    (Math.random() - 0.5) * settings.meteorRadius/100 * 0.05
+                    (Math.random() - 0.5) * settings.meteorRadius / 100 * 0.05, // انتشر أوسع حسب الحجم
+                    (Math.random() - 0.5) * settings.meteorRadius / 100 * 0.05,
+                    (Math.random() - 0.5) * settings.meteorRadius / 100 * 0.05
                 ),
                 color: color,
                 life: 1.0
@@ -74,17 +74,16 @@ export function createSpark_Explosion_Effects(scene,settings){
         sparkGeometry.attributes.position.needsUpdate = true
         sparkGeometry.attributes.color.needsUpdate = true
 
-        sparkMaterial.size = THREE.MathUtils.clamp(settings.meteorRadius/500 * 0.03, 0.2, 10)
+        sparkMaterial.size = THREE.MathUtils.clamp(settings.meteorRadius / 500 * 0.03, 0.2, 10)
     }
 
 
-    const meteorImpact=(earth,meteor,camera,sound6barAljmajm,soundCollison,soundCollison2,EK)=>{
+    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK) => {
         meteor.visible = false
         sound6barAljmajm.stop()
-        if(settings.meteorRadius>=70000){
+        if (settings.meteorRadius >= 70000) {
             soundCollison2.play()
-        }else
-        {
+        } else {
             soundCollison.play()
         }
         const impactDirection = new THREE.Vector3().subVectors(meteor.position, earth.position).normalize()
@@ -97,13 +96,13 @@ export function createSpark_Explosion_Effects(scene,settings){
         let explosionTime = 0
 
         // توليد توزيع كروي
-        const particlesCount = 4000
+        const particlesCount = 8000
         const positions = new Float32Array(particlesCount * 3)
 
         for (let i = 0; i < particlesCount; i++) {
             const theta = Math.random() * Math.PI * 2
             const phi = Math.acos(2 * Math.random() - 1)
-            const r = Math.random() * (EK / 1e23) * 80 + 5 // حجم الكرة يتناسب مع طاقة الانفجار
+            const r = Math.random() * (EK / 1e23) * 40 + 5 // حجم الكرة يتناسب مع طاقة الانفجار
 
             const x = r * Math.sin(phi) * Math.cos(theta)
             const y = r * Math.sin(phi) * Math.sin(theta)
@@ -133,7 +132,7 @@ export function createSpark_Explosion_Effects(scene,settings){
         shakeElapsed = 0
         shakeIntensity = 0.5
         originalCameraPosition.copy(camera.position)
-        
+
     }
     let isShaking = false
     let shakeDuration = 0
@@ -157,52 +156,5 @@ export function createSpark_Explosion_Effects(scene,settings){
         }
     }
 
-    return({activeInAtmosphere,meteorImpact,shake})
-
-}// const activeInAtmosphere=  (settings,meteor,deltaTime)=>{
-//     const sparkCount = Math.ceil(settings.meteorRadius * 5)
-//
-//     for (let i = 0; i < sparkCount; i++) {
-//         const sparkHue = THREE.MathUtils.clamp(0.02 + settings.meteorTemperature * 0.00003, 0, 0.15)
-//         const color = new THREE.Color().setHSL(sparkHue, 1, 0.5)
-//
-//         sparks.push({
-//             position: meteor.position.clone(),
-//             velocity: new THREE.Vector3(
-//                 (Math.random() - 0.5) * 0.1,
-//                 (Math.random() - 0.5) * 0.1,
-//                 (Math.random() - 0.5) * 0.1
-//             ),
-//             color: color,
-//             life: 1.0
-//         })
-//     }
-//
-//     const sparkPositions = []
-//     const sparkColors = []
-//
-//     for (let i = sparks.length - 1; i >= 0; i--) {
-//         const s = sparks[i]
-//         s.life -= deltaTime * 0.002
-//
-//         if (s.life <= 0) {
-//             sparks.splice(i, 1)
-//             continue
-//         }
-//
-//         // تحديث الموقع
-//         s.position.add(s.velocity.clone().multiplyScalar(deltaTime * 0.01))
-//
-//         // دفع البيانات للمصفوفة
-//         sparkPositions.push(s.position.x, s.position.y, s.position.z)
-//         sparkColors.push(s.color.r, s.color.g, s.color.b)
-//     }
-//
-//     sparkGeometry.setAttribute('position', new THREE.Float32BufferAttribute(sparkPositions, 3))
-//     sparkGeometry.setAttribute('color', new THREE.Float32BufferAttribute(sparkColors, 3))
-//     sparkGeometry.attributes.position.needsUpdate = true
-//     sparkGeometry.attributes.color.needsUpdate = true
-//
-//     sparkMaterial.size = THREE.MathUtils.clamp(settings.meteorRadius * 0.3, 0.1, 1)
-//
-// }
+    return ({activeInAtmosphere, meteorImpact, shake})
+}

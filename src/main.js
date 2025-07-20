@@ -18,7 +18,7 @@ const settings = {
     atmosphereDayColor : '#00aaff',
     atmosphereTwilightColor : '#4fda22',
     meteorType:'rock',
-    meteorSpeed:1,
+    meteorSpeed:10,
     meteorTemperature:1,
     meteorRadius:1,
     gravity:0,
@@ -38,7 +38,7 @@ const settings = {
         camera.getWorldDirection(launchDirection)
         launchDirection.normalize()
 
-        physicsMeteor=new PhysicsMeteor(meteor.position,settings.meteorRadius,settings.meteorSpeed,settings.meteorTemperature,launchDirection.normalize(),settings.meteorType)
+        physicsMeteor=new PhysicsMeteor(meteor.position,settings.meteorRadius,settings.meteorSpeed/10,settings.meteorTemperature,launchDirection.normalize(),settings.meteorType)
     }
 }
 //Planet Scene
@@ -118,7 +118,7 @@ const followMeteor = () => {
 }
 
 // Base camera
-const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 1, 14000)
+const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 1, 24000)
 camera.position.x = 0
 camera.position.y = 0
 camera.position.z = 2000
@@ -186,7 +186,8 @@ const loop = () =>
     const elapsedTime = clock.getElapsedTime()
     earth.rotation.y = elapsedTime * 2*Math.PI/1440;
     if (started && !physicsMeteor.isCrashed()&&!physicsMeteor.checkCollision()) {
-        physicsMeteor.update(deltaTime)
+        started=physicsMeteor.update(deltaTime)
+        !started?sound6barAljmajm.stop():console.log("started")
         updateControllersDisplay(physicsMeteor)
         if(physicsMeteor.isInAtmosphere()){
             if(settings.meteorMass<=0){

@@ -19,8 +19,10 @@ export function createGUI(settings,updateCallback) {
 
     const speedMeteorController=metSetGUI
         .add(settings,'meteorSpeed')
-        .name('Speed (m/s)')
-        .min(1)
+        .name('Speed (.' +
+            'm/s)')
+        .min(10)
+        .max(40000)
         .step(1)
         .listen()
     const meteorTemperatureController=metSetGUI
@@ -62,7 +64,7 @@ export function createGUI(settings,updateCallback) {
     {
         settings.meteorRadius=physicsMeteor.meteorRadius
         settings.meteorTemperature=physicsMeteor.temperature
-        settings.meteorSpeed=physicsMeteor.getspeed()
+        settings.meteorSpeed=physicsMeteor.getspeed()*10
         settings.gravity=physicsMeteor.getGravity()
         settings.meteorMass=Math.ceil(physicsMeteor.meteorMass/1000)
         settings.EK=Math.ceil(physicsMeteor.Ek/1000)
