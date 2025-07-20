@@ -26,7 +26,6 @@ class Meteor{
         this.meteorMass = 0;
         this.atmHight = World.EarthRaduis*1.5
         this.setMeteorType(type);
-        this.getTemperatureAtAltitude();
 
 
     }
@@ -136,6 +135,7 @@ class Meteor{
         let massOfOneAirMolecule = World.MolarMassOfDryAir
 
         let x = (-1 * massOfOneAirMolecule * this.gravity * h) / (r * Tkelvin);
+
         return p0 * Math.exp(x);
     }
 
@@ -323,7 +323,7 @@ class Meteor{
     }
 
     getspeed(){
-        return this.velocity.getLength()/10;
+        return this.velocity.getLength();
     }
 
     resetForces() {
@@ -367,7 +367,7 @@ class Meteor{
 
         this.gravityForce();
 
-        if(this.isInAtmosphere() && this.heightAboveTheGround() >= 0.1){
+        if(this.isInAtmosphere() && this.heightAboveTheGround() >= 1){
 
             this.massDecrease(deltaTime);
 

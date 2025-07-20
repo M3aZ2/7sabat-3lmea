@@ -46,7 +46,7 @@ const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
 //Meteor
 const {meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate,updateTrial}=createMeteor(scene,textureLoader,settings)
 //Explosion
-const {activeInAtmosphere,meteorImpact,shake}=createSpark_Explosion_Effects(scene,settings)
+const {activeInAtmosphere,meteorImpact}=createSpark_Explosion_Effects(scene,settings)
 // gui
 const {gui,updateControllersDisplay,disableGui}=createGUI(settings,{
    updateMeteorType,meteorRadiusUpdate
@@ -185,9 +185,12 @@ const loop = () =>
     const deltaTime = getDeltaTime()
     const elapsedTime = clock.getElapsedTime()
     earth.rotation.y = elapsedTime * 2*Math.PI/1440;
+    if(physicsMeteor)
+    {console.log(physicsMeteor.isCrashed())}
     if (started && !physicsMeteor.isCrashed()&&!physicsMeteor.checkCollision()) {
         started=physicsMeteor.update(deltaTime)
-        !started?sound6barAljmajm.stop():console.log("started")
+        !started?sound6barAljmajm.stop():''
+
         updateControllersDisplay(physicsMeteor)
         if(physicsMeteor.isInAtmosphere()){
             if(settings.meteorMass<=0){

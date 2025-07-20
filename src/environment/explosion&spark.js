@@ -127,34 +127,7 @@ export function createSpark_Explosion_Effects(scene,settings) {
             }
         }
         fadeOut()
-        isShaking = true
-        shakeDuration = 2
-        shakeElapsed = 0
-        shakeIntensity = 0.5
-        originalCameraPosition.copy(camera.position)
-
-    }
-    let isShaking = false
-    let shakeDuration = 0
-    let shakeElapsed = 0
-    let shakeIntensity = 0
-    let originalCameraPosition = new THREE.Vector3()
-
-
-    const shake = (deltaTime, camera) => {
-        if (!isShaking) return
-
-        shakeElapsed += deltaTime
-        if (shakeElapsed < shakeDuration) {
-            const shakeAmount = shakeIntensity * (1 - shakeElapsed / shakeDuration)
-            camera.position.x = originalCameraPosition.x + (Math.random() - 0.5) * shakeAmount
-            camera.position.y = originalCameraPosition.y + (Math.random() - 0.5) * shakeAmount
-            camera.position.z = originalCameraPosition.z + (Math.random() - 0.5) * shakeAmount
-        } else {
-            isShaking = false
-            camera.position.copy(originalCameraPosition)
-        }
     }
 
-    return ({activeInAtmosphere, meteorImpact, shake})
+    return ({activeInAtmosphere, meteorImpact})
 }
