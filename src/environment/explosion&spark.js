@@ -80,14 +80,10 @@ export function createSpark_Explosion_Effects(scene,settings) {
 
     const explosionVelocities = []
     let explosionElapsed = 0
+    let explosionDuration = 0
     const particlesCount = 8000
-    let explosionDuration = 0 // الوقت اللازم للانتشار الكامل
 
-    const meteorImpact = (
-        earth, meteor, camera,
-        sound6barAljmajm, soundCollison, soundCollison2,
-        EK, checkCollision, exploded
-    ) => {
+    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK, checkCollision, exploded) => {
         meteor.visible = false
         sound6barAljmajm.stop()
 
@@ -100,26 +96,29 @@ export function createSpark_Explosion_Effects(scene,settings) {
         const earthRadius = earth.geometry.parameters.radius
         const impactPoint = new THREE.Vector3().copy(earth.position).add(impactDirection.multiplyScalar(earthRadius * earth.scale.x))
 
-        const r = THREE.MathUtils.clamp((EK / 1e23) * 40 + 5, 5, 300)
-        explosionDuration = r / 0.05 // سرعة الجزيئات × الزمن = r
+        const maxRadius = THREE.MathUtils.clamp((EK / 1e23) * 10 + 5, 5, 300)
+        explosionDuration = maxRadius / 0.1 // كم تستغرق الجزيئات لتصل لأقصى مسافة
 
         const positions = new Float32Array(particlesCount * 3)
         explosionVelocities.length = 0
         explosionElapsed = 0
 
         for (let i = 0; i < particlesCount; i++) {
+            // الجزيئات تبدأ من مركز الانفجار
             positions[i * 3 + 0] = impactPoint.x
             positions[i * 3 + 1] = impactPoint.y
             positions[i * 3 + 2] = impactPoint.z
 
+            // توليد اتجاه عشوائي داخل كرة
             const theta = Math.random() * Math.PI * 2
             const phi = Math.acos(2 * Math.random() - 1)
+            const radius = Math.cbrt(Math.random()) * maxRadius
 
             const dir = new THREE.Vector3(
                 Math.sin(phi) * Math.cos(theta),
                 Math.sin(phi) * Math.sin(theta),
                 Math.cos(phi)
-            ).normalize() // اتجاه فقط، السرعة نحسبها لاحقًا
+            ).multiplyScalar(radius / explosionDuration * 0.1) // سرعة مناسبة
 
             explosionVelocities.push(dir)
         }
@@ -139,23 +138,19 @@ export function createSpark_Explosion_Effects(scene,settings) {
         explosionElapsed += deltaTime
         const posAttr = explosionParticles.geometry.attributes.position
 
-        const progress = Math.min(explosionElapsed / explosionDuration, 1)
-
         for (let i = 0; i < explosionVelocities.length; i++) {
-            const velocity = explosionVelocities[i].clone().multiplyScalar(0.05 * deltaTime * (progress < 1 ? 1 : 0)) // أوقف الحركة بعد الوصول
-            posAttr.array[i * 3 + 0] += velocity.x
-            posAttr.array[i * 3 + 1] += velocity.y
-            posAttr.array[i * 3 + 2] += velocity.z
+            posAttr.array[i * 3 + 0] += explosionVelocities[i].x * deltaTime
+            posAttr.array[i * 3 + 1] += explosionVelocities[i].y * deltaTime
+            posAttr.array[i * 3 + 2] += explosionVelocities[i].z * deltaTime
         }
 
         posAttr.needsUpdate = true
 
-        // Fade out تدريجي بعد التوقف
-        if (progress >= 1) {
-            particlesMaterial.opacity -= deltaTime * 0.0005 // اضمحلال بطيء
-            if (particlesMaterial.opacity <= 0) {
-                explosionParticles.visible = false
-            }
+        // جعلها تتلاشى تدريجياً
+        particlesMaterial.opacity = Math.max(1 - explosionElapsed / (explosionDuration * 30), 0)
+
+        if (explosionElapsed > explosionDuration * 30) {
+            explosionParticles.visible = false
         }
     }
 
