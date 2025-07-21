@@ -46,7 +46,7 @@ const {earth}=createPlanetScene(scene,textureLoader,cubeTextureLoader,settings)
 //Meteor
 const {meteor,updateMeteorType,updateMeteorColor,meteorRadiusUpdate,updateTrial}=createMeteor(scene,textureLoader,settings)
 //Explosion
-const {activeInAtmosphere,meteorImpact,updateExplosionParticles}=createSpark_Explosion_Effects(scene,settings)
+const {activeInAtmosphere,meteorImpact,updateExplosionParticles,updateSparksFadeOut}=createSpark_Explosion_Effects(scene)
 // gui
 const {gui,updateControllersDisplay,disableGui}=createGUI(settings,{
    updateMeteorType,meteorRadiusUpdate
@@ -135,14 +135,7 @@ audioLoader.load(
         soundCollison.setVolume(320);
     }
 );
-const soundCollison2 = new THREE.PositionalAudio(listener);
-audioLoader.load(
-    'gg.mp3',
-    buffer => {
-        soundCollison2.setBuffer(buffer);
-        soundCollison2.setVolume(400);
-    }
-);
+
 const sound6barAljmajm = new THREE.PositionalAudio(listener)
 let volume = 0
 sound6barAljmajm.setVolume(volume)
@@ -199,12 +192,13 @@ const loop = () =>
             activeInAtmosphere(settings,meteor,deltaTime)
         }
         if (physicsMeteor.checkCollision()||physicsMeteor.isExploded()) {
-            meteorImpact(earth,meteor,camera,sound6barAljmajm,soundCollison,soundCollison2,settings.EK,physicsMeteor.checkCollision(),physicsMeteor.isExploded())
+            meteorImpact(earth,meteor,camera,sound6barAljmajm,soundCollison,settings.EK,physicsMeteor.checkCollision(),physicsMeteor.isExploded())
         }
 
         updateTrial()
     }
         updateExplosionParticles(deltaTime)
+        updateSparksFadeOut(deltaTime)
     //shake(deltaTime/(Math.sqrt(settings.meteorRadius)*1000),camera)
     controls.update()
     if (settings.followMeteor&&started) {

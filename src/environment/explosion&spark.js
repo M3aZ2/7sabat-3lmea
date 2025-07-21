@@ -1,6 +1,6 @@
 import * as THREE from "three";
 // import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js'
-export function createSpark_Explosion_Effects(scene,settings) {
+export function createSpark_Explosion_Effects(scene) {
     const sparks = []//الذيل
     const sparkGeometry = new THREE.BufferGeometry()
     sparkGeometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3))
@@ -21,7 +21,7 @@ export function createSpark_Explosion_Effects(scene,settings) {
     const particlesGeometry = new THREE.BufferGeometry()
 
     const particlesMaterial = new THREE.PointsMaterial({
-        color: 0xffaa33,
+        vertexColors: true,
         size: 0.5,
         transparent: true,
         opacity: 1,
@@ -77,27 +77,57 @@ export function createSpark_Explosion_Effects(scene,settings) {
         sparkMaterial.size = THREE.MathUtils.clamp(settings.meteorRadius / 500 * 0.03, 0.2, 10)
     }
 
+    const updateSparksFadeOut = (deltaTime) => {
+        const sparkPositions = []
+        const sparkColors = []
+
+        for (let i = sparks.length - 1; i >= 0; i--) {
+            const s = sparks[i]
+            s.life -= deltaTime * 0.0005
+
+            if (s.life <= 0) {
+                sparks.splice(i, 1)
+                continue
+            }
+
+            s.position.add(s.velocity.clone().multiplyScalar(deltaTime * 0.001))
+
+            sparkPositions.push(s.position.x, s.position.y, s.position.z)
+
+            // تأثير التلاشي في اللون
+            const fadedColor = s.color.clone().lerp(new THREE.Color(0x000000), 1 - s.life)
+            sparkColors.push(fadedColor.r, fadedColor.g, fadedColor.b)
+        }
+
+        sparkGeometry.setAttribute('position', new THREE.Float32BufferAttribute(sparkPositions, 3))
+        sparkGeometry.setAttribute('color', new THREE.Float32BufferAttribute(sparkColors, 3))
+        sparkGeometry.attributes.position.needsUpdate = true
+        sparkGeometry.attributes.color.needsUpdate = true
+    }
 
     const explosionVelocities = []
     let explosionElapsed = 0
     let explosionDuration = 0
     const particlesCount = 8000
 
-    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK, checkCollision, exploded) => {
+    const colors = new Float32Array(particlesCount * 3)
+    const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, EK, checkCollision, exploded) => {
         meteor.visible = false
         sound6barAljmajm.stop()
 
         if (checkCollision && !exploded) {
-            if (settings.meteorRadius >= 70000) soundCollison2.play()
-            else soundCollison.play()
+             soundCollison.play()
         }
+        const baseColor1 = new THREE.Color(0x563d43) // برتقالي
+        const baseColor2 = new THREE.Color(0xff2200) // أحمر داكن
+
 
         const impactDirection = new THREE.Vector3().subVectors(meteor.position, earth.position).normalize()
         const earthRadius = earth.geometry.parameters.radius
         const impactPoint = new THREE.Vector3().copy(earth.position).add(impactDirection.multiplyScalar(earthRadius * earth.scale.x))
 
         const maxRadius = THREE.MathUtils.clamp((EK / 1e23) * 10 + 5, 5, 300)
-        explosionDuration = maxRadius / 0.1 // كم تستغرق الجزيئات لتصل لأقصى مسافة
+        explosionDuration = maxRadius / 0.2 // كم تستغرق الجزيئات لتصل لأقصى مسافة
 
         const positions = new Float32Array(particlesCount * 3)
         explosionVelocities.length = 0
@@ -108,7 +138,10 @@ export function createSpark_Explosion_Effects(scene,settings) {
             positions[i * 3 + 0] = impactPoint.x
             positions[i * 3 + 1] = impactPoint.y
             positions[i * 3 + 2] = impactPoint.z
-
+            const mixedColor = baseColor1.clone().lerp(baseColor2, Math.random())
+            colors[i * 3 + 0] = mixedColor.r
+            colors[i * 3 + 1] = mixedColor.g
+            colors[i * 3 + 2] = mixedColor.b
             // توليد اتجاه عشوائي داخل كرة
             const theta = Math.random() * Math.PI * 2
             const phi = Math.acos(2 * Math.random() - 1)
@@ -118,12 +151,14 @@ export function createSpark_Explosion_Effects(scene,settings) {
                 Math.sin(phi) * Math.cos(theta),
                 Math.sin(phi) * Math.sin(theta),
                 Math.cos(phi)
-            ).multiplyScalar(radius / explosionDuration * 0.1) // سرعة مناسبة
+            ).multiplyScalar(radius / explosionDuration * 0.2) // سرعة مناسبة
 
             explosionVelocities.push(dir)
         }
 
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+
         particlesGeometry.attributes.position.needsUpdate = true
 
         particlesMaterial.size = THREE.MathUtils.clamp(EK / 1e22, 0.5, 15)
@@ -154,7 +189,7 @@ export function createSpark_Explosion_Effects(scene,settings) {
         }
     }
 
-    return ({activeInAtmosphere, meteorImpact,updateExplosionParticles})
+    return ({activeInAtmosphere, meteorImpact,updateExplosionParticles,updateSparksFadeOut})
 }
 // const meteorImpact = (earth, meteor, camera, sound6barAljmajm, soundCollison, soundCollison2, EK,checkCollision,exploded) => {
 //     meteor.visible = false
